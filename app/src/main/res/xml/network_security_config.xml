@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cleartext HTTP is blocked by default: a controlplane key token is a bearer
+  credential, and both it and the Yandex Docs URL it resolves to should only
+  ever travel over TLS. If you need to point a debug build at a local,
+  HTTP-only controlplane during development, add a <domain-config> here
+  scoping cleartextTrafficPermitted="true" to that specific host - don't
+  flip the base-config, since that would also cover the release build.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
