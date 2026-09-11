@@ -33,6 +33,7 @@
     <string name="logs_reason_handshake_failed">the server didn\'t confirm the connection</string>
     <string name="logs_reason_send_failed">couldn\'t send sign-in data</string>
     <string name="logs_reason_read_error">the connection was interrupted</string>
+    <string name="logs_reason_auth_failed">couldn\'t sign in</string>
     <string name="logs_expand_detail">Show details</string>
     <string name="logs_collapse_detail">Hide details</string>
 
@@ -55,6 +56,7 @@
     <string name="profile_edit_check_key">Check key</string>
     <string name="profile_edit_doc_url">Yandex Docs URL</string>
     <string name="profile_edit_transport_yandex">Yandex Docs</string>
+    <string name="profile_edit_transport_volga">Volga</string>
     <string name="profile_edit_transport_max">MAX</string>
     <string name="profile_edit_max_token">MAX account auth token</string>
     <string name="profile_edit_max_uid">Contact user ID to call</string>

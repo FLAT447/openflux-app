@@ -36,7 +36,7 @@ object ProfileDeepLink {
             put("mode", if (profile.mode == ProfileMode.MANUAL) "manual" else "key")
             put("control_url", profile.controlUrl)
             put("key_token", profile.keyToken)
-            put("transport", if (profile.manualTransport == ManualTransport.MAX) "max" else "yandex")
+            put("transport", transportName(profile.manualTransport))
             put("doc_url", profile.docUrl)
             put("max_token", profile.maxToken)
             put("max_uid", profile.maxUid)
@@ -57,7 +57,7 @@ object ProfileDeepLink {
             mode = if (json.optString("mode") == "manual") ProfileMode.MANUAL else ProfileMode.KEY,
             controlUrl = json.optString("control_url", ""),
             keyToken = json.optString("key_token", ""),
-            manualTransport = if (json.optString("transport") == "max") ManualTransport.MAX else ManualTransport.YANDEX,
+            manualTransport = parseTransportName(json.optString("transport")),
             docUrl = json.optString("doc_url", ""),
             maxToken = json.optString("max_token", ""),
             maxUid = json.optLong("max_uid", 0),

@@ -81,13 +81,10 @@ class ProfileRepository(
  */
 fun Profile.toStartTunnelConfigJson(): String = JSONObject().apply {
     put("mode", "manual")
+    put("transport", transportName(manualTransport))
     when (manualTransport) {
-        ManualTransport.YANDEX -> {
-            put("transport", "yandex")
-            put("doc_url", docUrl)
-        }
+        ManualTransport.YANDEX, ManualTransport.VOLGA -> put("doc_url", docUrl)
         ManualTransport.MAX -> {
-            put("transport", "max")
             put("max_token", maxToken)
             put("max_uid", maxUid)
         }

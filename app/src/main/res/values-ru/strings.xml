@@ -33,6 +33,7 @@
     <string name="logs_reason_handshake_failed">сервер не подтвердил подключение</string>
     <string name="logs_reason_send_failed">не удалось отправить данные для входа</string>
     <string name="logs_reason_read_error">соединение прервано</string>
+    <string name="logs_reason_auth_failed">не удалось войти</string>
     <string name="logs_expand_detail">Показать подробности</string>
     <string name="logs_collapse_detail">Скрыть подробности</string>
 
@@ -55,6 +56,7 @@
     <string name="profile_edit_check_key">Проверить ключ</string>
     <string name="profile_edit_doc_url">Ссылка на Yandex Docs</string>
     <string name="profile_edit_transport_yandex">Yandex Docs</string>
+    <string name="profile_edit_transport_volga">Volga</string>
     <string name="profile_edit_transport_max">MAX</string>
     <string name="profile_edit_max_token">Токен авторизации аккаунта MAX</string>
     <string name="profile_edit_max_uid">ID пользователя для звонка</string>

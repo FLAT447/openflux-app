@@ -44,6 +44,7 @@ import org.openflux.app.data.ManualTransport
 import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileMode
 import org.openflux.app.data.ProfileRepository
+import org.openflux.app.data.parseTransportName
 
 class ProfileEditViewModel(private val repository: ProfileRepository) : ViewModel() {
     fun loadOrNew(id: String?, onLoaded: (Profile) -> Unit) {
@@ -87,7 +88,7 @@ class ProfileEditViewModel(private val repository: ProfileRepository) : ViewMode
                 if (json.optString("status") == "active") {
                     ResolvedKey(
                         docUrl = json.getString("doc_url"),
-                        transport = if (json.optString("transport") == "max") ManualTransport.MAX else ManualTransport.YANDEX,
+                        transport = parseTransportName(json.optString("transport")),
                     )
                 } else {
                     null
@@ -221,6 +222,12 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                             label = { Text(stringResource(R.string.profile_edit_transport_yandex)) },
                         )
                         FilterChip(
+                            selected = current.manualTransport == ManualTransport.VOLGA,
+                            onClick = { profile = current.copy(manualTransport = ManualTransport.VOLGA) },
+                            label = { Text(stringResource(R.string.profile_edit_transport_volga)) },
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                        FilterChip(
                             selected = current.manualTransport == ManualTransport.MAX,
                             onClick = { profile = current.copy(manualTransport = ManualTransport.MAX) },
                             label = { Text(stringResource(R.string.profile_edit_transport_max)) },
@@ -228,7 +235,7 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                         )
                     }
                     when (current.manualTransport) {
-                        ManualTransport.YANDEX -> {
+                        ManualTransport.YANDEX, ManualTransport.VOLGA -> {
                             OutlinedTextField(
                                 value = current.docUrl,
                                 onValueChange = { profile = current.copy(docUrl = it) },

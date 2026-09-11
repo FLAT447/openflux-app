@@ -3,7 +3,20 @@ package org.openflux.app.data
 enum class ProfileMode { KEY, MANUAL }
 
 /** Only meaningful when mode == MANUAL - a KEY-mode profile's transport is whatever controlplane hands out. */
-enum class ManualTransport { YANDEX, MAX }
+enum class ManualTransport { YANDEX, VOLGA, MAX }
+
+/** The wire name mobile.Config and deep links use for a transport - see mobile/mobile.go. */
+fun transportName(t: ManualTransport): String = when (t) {
+    ManualTransport.YANDEX -> "yandex"
+    ManualTransport.VOLGA -> "volga"
+    ManualTransport.MAX -> "max"
+}
+
+fun parseTransportName(name: String): ManualTransport = when (name) {
+    "volga" -> ManualTransport.VOLGA
+    "max" -> ManualTransport.MAX
+    else -> ManualTransport.YANDEX
+}
 
 /**
  * A profile as the rest of the app sees it: [ProfileEntity]'s non-secret

@@ -163,7 +163,9 @@ private fun reasonLabel(code: String): String = when (code) {
     "dial_failed" -> stringResource(R.string.logs_reason_dial_failed)
     "handshake_failed" -> stringResource(R.string.logs_reason_handshake_failed)
     "send_failed" -> stringResource(R.string.logs_reason_send_failed)
-    "read_error" -> stringResource(R.string.logs_reason_read_error)
+    "read_error", "ws_read_error" -> stringResource(R.string.logs_reason_read_error)
+    "ws_dial_failed" -> stringResource(R.string.logs_reason_dial_failed)
+    "auth_failed" -> stringResource(R.string.logs_reason_auth_failed)
     else -> code
 }
 
