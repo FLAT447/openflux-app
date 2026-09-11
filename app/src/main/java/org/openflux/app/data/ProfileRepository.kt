@@ -69,29 +69,40 @@ class ProfileRepository(
 /**
  * Builds the JSON contract the `mobile` Go package's StartTunnel expects
  * (see mobile/mobile.go's Config struct) from this profile.
+ *
+ * KEY and MANUAL profiles connect identically: control_url/key_token are
+ * only ever used for the explicit, user-initiated "check key" action (see
+ * ProfileEditScreen) - connecting always uses the already-known doc_url,
+ * either typed in directly (MANUAL) or cached from a deep link import or a
+ * past "check key" (KEY), so it never depends on a live, unshielded request
+ * to the controlplane that a hostile network could block. Callers must not
+ * call this for a KEY profile with a blank docUrl - see
+ * Profile.isReadyToConnect.
  */
 fun Profile.toStartTunnelConfigJson(): String = JSONObject().apply {
-    when (mode) {
-        ProfileMode.KEY -> {
-            put("mode", "key")
-            put("control_url", controlUrl)
-            put("key_token", keyToken)
+    put("mode", "manual")
+    when (manualTransport) {
+        ManualTransport.YANDEX -> {
+            put("transport", "yandex")
+            put("doc_url", docUrl)
         }
-        ProfileMode.MANUAL -> {
-            put("mode", "manual")
-            when (manualTransport) {
-                ManualTransport.YANDEX -> {
-                    put("transport", "yandex")
-                    put("doc_url", docUrl)
-                }
-                ManualTransport.MAX -> {
-                    put("transport", "max")
-                    put("max_token", maxToken)
-                    put("max_uid", maxUid)
-                }
-            }
+        ManualTransport.MAX -> {
+            put("transport", "max")
+            put("max_token", maxToken)
+            put("max_uid", maxUid)
         }
     }
     put("mtu", mtu)
     put("dns_upstream", dnsUpstream)
 }.toString()
+
+/**
+ * False only for a KEY profile that has never been resolved (no deep-link
+ * import, no successful "check key" yet) - connecting it would need a live
+ * controlplane request this app no longer makes automatically.
+ */
+val Profile.isReadyToConnect: Boolean
+    get() = when (mode) {
+        ProfileMode.KEY -> docUrl.isNotBlank()
+        ProfileMode.MANUAL -> true
+    }

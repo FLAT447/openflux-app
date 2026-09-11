@@ -16,6 +16,7 @@ import org.openflux.app.MainActivity
 import org.openflux.app.OpenFluxApplication
 import org.openflux.app.R
 import org.openflux.app.data.SplitTunnelMode
+import org.openflux.app.data.isReadyToConnect
 import org.openflux.app.data.toStartTunnelConfigJson
 
 /**
@@ -53,6 +54,11 @@ class OpenFluxVpnService : VpnService() {
             val profile = app.profileRepository.getById(profileId)
             if (profile == null) {
                 callback.onStatus("error:profile not found")
+                stopSelf()
+                return@launch
+            }
+            if (!profile.isReadyToConnect) {
+                callback.onStatus("error:key not resolved yet - open the profile and tap \"Check key\"")
                 stopSelf()
                 return@launch
             }

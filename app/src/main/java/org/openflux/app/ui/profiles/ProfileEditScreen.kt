@@ -64,18 +64,41 @@ class ProfileEditViewModel(private val repository: ProfileRepository) : ViewMode
         }
     }
 
-    /** Calls into the Go `mobile` package's ResolveKey - see mobile/resolve.go. */
-    fun checkKey(controlUrl: String, keyToken: String, onResult: (String) -> Unit) {
+    /**
+     * Calls into the Go `mobile` package's ResolveKey (mobile/resolve.go) -
+     * the one deliberate, user-initiated exception to this app never making
+     * a live request to the controlplane to connect (see
+     * Profile.isReadyToConnect). On an active key, also hands back the
+     * doc_url/transport to cache onto the profile so future connects never
+     * need this again.
+     */
+    fun checkKey(controlUrl: String, keyToken: String, onResult: (text: String, resolved: ResolvedKey?) -> Unit) {
         viewModelScope.launch {
-            val result = runCatching {
+            val raw = runCatching {
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                     Mobile.resolveKey(controlUrl, keyToken)
                 }
-            }.getOrElse { "error: ${it.message}" }
-            onResult(result)
+            }.getOrElse {
+                onResult("error: ${it.message}", null)
+                return@launch
+            }
+            val resolved = runCatching {
+                val json = org.json.JSONObject(raw)
+                if (json.optString("status") == "active") {
+                    ResolvedKey(
+                        docUrl = json.getString("doc_url"),
+                        transport = if (json.optString("transport") == "max") ManualTransport.MAX else ManualTransport.YANDEX,
+                    )
+                } else {
+                    null
+                }
+            }.getOrNull()
+            onResult(raw, resolved)
         }
     }
 }
+
+data class ResolvedKey(val docUrl: String, val transport: ManualTransport)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -172,7 +195,12 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                     OutlinedButton(
                         onClick = {
                             checkResult = null
-                            viewModel.checkKey(current.controlUrl, current.keyToken) { checkResult = it }
+                            viewModel.checkKey(current.controlUrl, current.keyToken) { text, resolved ->
+                                checkResult = text
+                                if (resolved != null) {
+                                    profile = current.copy(docUrl = resolved.docUrl, manualTransport = resolved.transport)
+                                }
+                            }
                         },
                         modifier = Modifier.padding(top = 8.dp),
                     ) { Text(stringResource(R.string.profile_edit_check_key)) }
