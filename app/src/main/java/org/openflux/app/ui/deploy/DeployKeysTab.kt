@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -42,12 +43,13 @@ fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
 
     Column(Modifier.fillMaxSize()) {
         Card(Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(Modifier.padding(12.dp)) {
+            Column(Modifier.padding(16.dp)) {
+                Text(stringResource(R.string.deploy_keys_new_header), style = MaterialTheme.typography.titleMedium)
                 OutlinedTextField(
                     value = label,
                     onValueChange = { label = it },
                     label = { Text(stringResource(R.string.deploy_keys_label)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )
                 OutlinedTextField(
                     value = docUrl,
@@ -75,10 +77,16 @@ fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
                         trafficLimitGb = ""
                         ownerRef = ""
                     },
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 ) { Text(stringResource(R.string.deploy_keys_create)) }
             }
         }
+
+        Text(
+            stringResource(R.string.deploy_keys_section),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
+        )
 
         if (keys.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

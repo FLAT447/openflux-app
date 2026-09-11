@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -48,12 +49,12 @@ fun DeploySettingsTab(viewModel: DeployServerDetailViewModel) {
 
     Column(Modifier.fillMaxSize()) {
         Card(Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(Modifier.padding(12.dp)) {
-                Text(stringResource(R.string.deploy_settings_node_section))
+            Column(Modifier.padding(16.dp)) {
+                Text(stringResource(R.string.deploy_settings_node_section), style = MaterialTheme.typography.titleMedium)
                 if (node != null) {
                     Text(
                         stringResource(R.string.deploy_settings_node_status, nodeStatusLabel(node.status)),
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                     Text(stringResource(R.string.deploy_settings_node_max_keys, node.maxKeys))
                     Text(
@@ -65,42 +66,52 @@ fun DeploySettingsTab(viewModel: DeployServerDetailViewModel) {
                     )
                     OutlinedButton(
                         onClick = { viewModel.rotateNodeToken(node.id) },
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     ) { Text(stringResource(R.string.deploy_settings_rotate_token)) }
                 } else {
                     Text(
                         stringResource(R.string.deploy_settings_node_missing),
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 12.dp),
                     )
                     Button(
                         onClick = { server?.let { viewModel.createNode(it.nodeName, it.nodeMaxKeys) } },
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     ) { Text(stringResource(R.string.deploy_settings_register_node)) }
                 }
             }
         }
 
         Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Column(Modifier.padding(12.dp)) {
-                Text(stringResource(R.string.deploy_settings_ingest_section))
+            Column(Modifier.padding(16.dp)) {
+                Text(stringResource(R.string.deploy_settings_ingest_section), style = MaterialTheme.typography.titleMedium)
                 Text(
                     stringResource(R.string.deploy_settings_ingest_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 OutlinedTextField(
                     value = ingestLabel,
                     onValueChange = { ingestLabel = it },
                     label = { Text(stringResource(R.string.deploy_settings_ingest_label)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )
                 Button(
                     onClick = {
                         viewModel.createIngestToken(ingestLabel)
                         ingestLabel = ""
                     },
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 ) { Text(stringResource(R.string.deploy_settings_ingest_create)) }
             }
+        }
+
+        if (ingestTokens.isNotEmpty()) {
+            Text(
+                stringResource(R.string.deploy_settings_ingest_list_header),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 4.dp),
+            )
         }
 
         if (ingestTokens.isEmpty()) {
@@ -108,7 +119,7 @@ fun DeploySettingsTab(viewModel: DeployServerDetailViewModel) {
                 Text(stringResource(R.string.deploy_settings_ingest_empty))
             }
         } else {
-            LazyColumn(Modifier.fillMaxSize().padding(top = 8.dp)) {
+            LazyColumn(Modifier.fillMaxSize().padding(top = 4.dp)) {
                 items(ingestTokens, key = { it.id }) { token ->
                     IngestTokenRow(
                         token = token,
