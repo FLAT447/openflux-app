@@ -5,6 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import org.openflux.app.data.AppDatabase
+import org.openflux.app.data.DeployServerRepository
+import org.openflux.app.data.DeployServerSecretsStore
 import org.openflux.app.data.ProfileRepository
 import org.openflux.app.data.SecretsStore
 import org.openflux.app.data.SettingsRepository
@@ -17,6 +19,9 @@ class OpenFluxApplication : Application() {
     lateinit var settingsRepository: SettingsRepository
         private set
 
+    lateinit var deployServerRepository: DeployServerRepository
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -24,6 +29,7 @@ class OpenFluxApplication : Application() {
         val secrets = SecretsStore(this)
         profileRepository = ProfileRepository(db.profileDao(), secrets)
         settingsRepository = SettingsRepository(this)
+        deployServerRepository = DeployServerRepository(db.deployServerDao(), DeployServerSecretsStore(this))
 
         createVpnNotificationChannel()
     }

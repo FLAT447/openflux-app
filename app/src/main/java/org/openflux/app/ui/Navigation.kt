@@ -3,6 +3,7 @@ package org.openflux.app.ui
 import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
@@ -26,6 +27,9 @@ import androidx.navigation.compose.rememberNavController
 import org.openflux.app.R
 import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileDeepLink
+import org.openflux.app.ui.deploy.DeployListScreen
+import org.openflux.app.ui.deploy.DeployServerDetailScreen
+import org.openflux.app.ui.deploy.DeployServerEditScreen
 import org.openflux.app.ui.home.HomeScreen
 import org.openflux.app.ui.profiles.ProfileEditScreen
 import org.openflux.app.ui.profiles.ProfileListScreen
@@ -34,11 +38,15 @@ import org.openflux.app.ui.settings.SettingsScreen
 private sealed class Destination(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     data object Home : Destination("home", R.string.nav_home, Icons.Filled.Home)
     data object Profiles : Destination("profiles", R.string.nav_profiles, Icons.Filled.List)
+    data object Deploy : Destination("deploy", R.string.nav_deploy, Icons.Filled.Build)
     data object Settings : Destination("settings", R.string.nav_settings, Icons.Filled.Settings)
 }
 
 private const val PROFILE_EDIT_ROUTE = "profile_edit"
 private const val PROFILE_ID_ARG = "profileId"
+private const val DEPLOY_EDIT_ROUTE = "deploy_edit"
+private const val DEPLOY_DETAIL_ROUTE = "deploy_detail"
+private const val DEPLOY_ID_ARG = "serverId"
 
 @Composable
 fun OpenFluxNavHost(
@@ -48,7 +56,7 @@ fun OpenFluxNavHost(
     onDeepLinkHandled: () -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val tabs = listOf(Destination.Home, Destination.Profiles, Destination.Settings)
+    val tabs = listOf(Destination.Home, Destination.Profiles, Destination.Deploy, Destination.Settings)
 
     // Set right before navigating to "profile_edit/new" for an imported
     // link, and cleared as soon as that screen is done with it (saved or
@@ -76,13 +84,17 @@ fun OpenFluxNavHost(
                         onClick = {
                             navController.navigate(tab.route) {
                                 // Deliberately no saveState/restoreState: this
-                                // is a simple 3-tab app with no deep per-tab
+                                // is a simple tabbed app with no deep per-tab
                                 // history worth preserving, and restoring a
                                 // saved back stack was exactly what caused a
                                 // stale "new profile" draft (or the wrong
                                 // screen) to reappear after leaving it
                                 // mid-edit and coming back. Tapping a tab
                                 // always fully resets to that tab's root.
+                                // Long-running work (a deploy) survives this
+                                // fine regardless, since it lives in
+                                // deploy.DeployManager, not in a screen's
+                                // ViewModel - see its doc comment.
                                 popUpTo(navController.graph.findStartDestination().id)
                                 launchSingleTop = true
                             }
@@ -132,6 +144,32 @@ fun OpenFluxNavHost(
                     importedProfile = if (isNew) importedProfile else null,
                     onDone = { navController.popBackStack() },
                 )
+            }
+            composable(Destination.Deploy.route) {
+                DeployListScreen(
+                    onAddServer = { navController.navigate("$DEPLOY_EDIT_ROUTE/new") },
+                    onOpenServer = { id -> navController.navigate("$DEPLOY_DETAIL_ROUTE/$id") },
+                )
+            }
+            composable(
+                route = "$DEPLOY_EDIT_ROUTE/{$DEPLOY_ID_ARG}",
+            ) { backStackEntry ->
+                val rawId = backStackEntry.arguments?.getString(DEPLOY_ID_ARG)
+                DeployServerEditScreen(
+                    serverId = rawId?.takeIf { it != "new" },
+                    onDone = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "$DEPLOY_DETAIL_ROUTE/{$DEPLOY_ID_ARG}",
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString(DEPLOY_ID_ARG)
+                if (id != null) {
+                    DeployServerDetailScreen(
+                        serverId = id,
+                        onEditServer = { navController.navigate("$DEPLOY_EDIT_ROUTE/$it") },
+                    )
+                }
             }
             composable(Destination.Settings.route) {
                 SettingsScreen()

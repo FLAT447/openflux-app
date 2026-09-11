@@ -1,0 +1,132 @@
+package org.openflux.app.ui.deploy
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import org.openflux.app.R
+import org.openflux.app.data.AdminKey
+
+@Composable
+fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
+    val keys by viewModel.keys.collectAsState()
+    var label by remember { mutableStateOf("") }
+    var docUrl by remember { mutableStateOf("") }
+    var trafficLimitGb by remember { mutableStateOf("") }
+    var ownerRef by remember { mutableStateOf("") }
+
+    Column(Modifier.fillMaxSize()) {
+        Card(Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(Modifier.padding(12.dp)) {
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { label = it },
+                    label = { Text(stringResource(R.string.deploy_keys_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = docUrl,
+                    onValueChange = { docUrl = it },
+                    label = { Text(stringResource(R.string.deploy_keys_doc_url)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                OutlinedTextField(
+                    value = trafficLimitGb,
+                    onValueChange = { trafficLimitGb = it },
+                    label = { Text(stringResource(R.string.deploy_keys_traffic_limit_gb)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                OutlinedTextField(
+                    value = ownerRef,
+                    onValueChange = { ownerRef = it },
+                    label = { Text(stringResource(R.string.deploy_keys_owner_ref)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                Button(
+                    onClick = {
+                        viewModel.createKey(label, docUrl, trafficLimitGb.toDoubleOrNull(), ownerRef)
+                        label = ""
+                        docUrl = ""
+                        trafficLimitGb = ""
+                        ownerRef = ""
+                    },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) { Text(stringResource(R.string.deploy_keys_create)) }
+            }
+        }
+
+        if (keys.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(stringResource(R.string.deploy_keys_empty))
+            }
+        } else {
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(keys, key = { it.id }) { key ->
+                    KeyRow(
+                        key = key,
+                        onToggleEnabled = { viewModel.setKeyEnabled(key.id, !key.enabled) },
+                        onDelete = { viewModel.deleteKey(key.id) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeyRow(key: AdminKey, onToggleEnabled: () -> Unit, onDelete: () -> Unit) {
+    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(key.label.ifBlank { "(no label)" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(formatBytes(key.bytesSentTotal + key.bytesReceivedTotal) + " used")
+            }
+            OutlinedButton(onClick = onToggleEnabled) {
+                Text(stringResource(if (key.enabled) R.string.deploy_keys_disable else R.string.deploy_keys_enable))
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.deploy_keys_delete))
+            }
+        }
+    }
+}
+
+private fun formatBytes(bytes: Long): String {
+    val units = listOf("B", "KB", "MB", "GB", "TB")
+    var value = bytes.toDouble()
+    var unitIndex = 0
+    while (value >= 1024 && unitIndex < units.lastIndex) {
+        value /= 1024
+        unitIndex++
+    }
+    return "%.1f %s".format(value, units[unitIndex])
+}

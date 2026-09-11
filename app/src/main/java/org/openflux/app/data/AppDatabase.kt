@@ -5,9 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ProfileEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [ProfileEntity::class, DeployServerEntity::class],
+    version = 2,
+    exportSchema = false,
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
+    abstract fun deployServerDao(): DeployServerDao
 
     companion object {
         @Volatile private var instance: AppDatabase? = null
@@ -18,7 +23,12 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "openflux.db",
-                ).build().also { instance = it }
+                )
+                    // No shipped users yet, so a destructive migration for
+                    // this schema bump (adding deploy_servers) is the
+                    // pragmatic choice rather than writing a real Migration.
+                    .fallbackToDestructiveMigration()
+                    .build().also { instance = it }
             }
     }
 }
