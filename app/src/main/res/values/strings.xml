@@ -87,14 +87,8 @@
     <string name="deploy_detail_admin_token">Admin token: %1$s</string>
     <string name="deploy_detail_log_title">Log</string>
     <string name="deploy_detail_tab_log">Log</string>
-    <string name="deploy_detail_tab_nodes">Nodes</string>
     <string name="deploy_detail_tab_keys">Keys</string>
-    <string name="deploy_detail_tab_ingest">Ingest tokens</string>
-
-    <string name="deploy_nodes_create">Register node</string>
-    <string name="deploy_nodes_empty">No nodes yet.</string>
-    <string name="deploy_nodes_rotate_token">Rotate token</string>
-    <string name="deploy_nodes_new_token">New node token (shown once): %1$s</string>
+    <string name="deploy_detail_tab_settings">Settings</string>
 
     <string name="deploy_keys_create">Create key</string>
     <string name="deploy_keys_empty">No keys yet.</string>
@@ -102,15 +96,33 @@
     <string name="deploy_keys_doc_url">Yandex Docs URL</string>
     <string name="deploy_keys_traffic_limit_gb">Traffic limit, GB (blank = unlimited)</string>
     <string name="deploy_keys_owner_ref">Owner (optional)</string>
-    <string name="deploy_keys_new_token">New key token (shown once): %1$s</string>
+    <string name="deploy_keys_new_token">Key token (shown once): %1$s</string>
     <string name="deploy_keys_enable">Enable</string>
     <string name="deploy_keys_disable">Disable</string>
     <string name="deploy_keys_delete">Delete</string>
 
-    <string name="deploy_ingest_create">Create ingest token</string>
-    <string name="deploy_ingest_empty">No ingest tokens yet.</string>
-    <string name="deploy_ingest_label">Label</string>
-    <string name="deploy_ingest_new_token">New ingest token (shown once): %1$s</string>
+    <string name="deploy_settings_node_section">This server\'s node</string>
+    <string name="deploy_settings_node_status">Status: %1$s</string>
+    <string name="deploy_settings_node_status_active">active</string>
+    <string name="deploy_settings_node_status_disabled">disabled</string>
+    <string name="deploy_settings_node_max_keys">Key limit: %1$d</string>
+    <string name="deploy_settings_node_heartbeat">Last seen: %1$s</string>
+    <string name="deploy_settings_node_never">never</string>
+    <string name="deploy_settings_node_missing">This server doesn\'t have a node registered yet.</string>
+    <string name="deploy_settings_register_node">Register node</string>
+    <string name="deploy_settings_rotate_token">Rotate node token</string>
+    <string name="deploy_settings_node_token_issued">Node token (shown once): %1$s</string>
+
+    <string name="deploy_settings_ingest_section">Automatic key issuing</string>
+    <string name="deploy_settings_ingest_hint">For external services (e.g. a bot or a shop) that create keys via the API themselves.</string>
+    <string name="deploy_settings_ingest_create">Create token</string>
+    <string name="deploy_settings_ingest_empty">No tokens yet.</string>
+    <string name="deploy_settings_ingest_label">Label</string>
+    <string name="deploy_settings_ingest_token_issued">Integration token (shown once): %1$s</string>
+    <string name="deploy_settings_ingest_enable">Enable</string>
+    <string name="deploy_settings_ingest_disable">Disable</string>
+
+    <string name="deploy_generic_error">Request failed</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_start_on_boot">Connect on device boot</string>

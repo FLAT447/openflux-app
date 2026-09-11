@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.openflux.app.LocalOpenFluxApp
+import org.openflux.app.OpenFluxApplication
 import org.openflux.app.R
 import org.openflux.app.data.AdminIngestToken
 import org.openflux.app.data.AdminKey
@@ -57,6 +58,7 @@ data class DetailMessage(val text: String, val isError: Boolean)
 class DeployServerDetailViewModel(
     private val repository: DeployServerRepository,
     private val serverId: String,
+    private val app: OpenFluxApplication,
 ) : ViewModel() {
     private val _server = MutableStateFlow<DeployServer?>(null)
     val server: StateFlow<DeployServer?> = _server
@@ -104,19 +106,19 @@ class DeployServerDetailViewModel(
 
     fun createNode(name: String, maxKeys: Int) = runAction { client ->
         val created = client.createNode(name, maxKeys)
-        _message.value = DetailMessage("Node token: ${created.token}", isError = false)
+        _message.value = DetailMessage(app.getString(R.string.deploy_settings_node_token_issued, created.token), isError = false)
         _nodes.value = client.listNodes()
     }
 
     fun rotateNodeToken(id: String) = runAction { client ->
         val token = client.rotateNodeToken(id)
-        _message.value = DetailMessage("New node token: $token", isError = false)
+        _message.value = DetailMessage(app.getString(R.string.deploy_settings_node_token_issued, token), isError = false)
     }
 
     fun createKey(label: String, docUrl: String, trafficLimitGb: Double?, ownerRef: String) = runAction { client ->
         val bytes = trafficLimitGb?.let { (it * 1024 * 1024 * 1024).toLong() }
         val created = client.createKey(label, docUrl, bytes, ownerRef)
-        _message.value = DetailMessage("Key token: ${created.token}", isError = false)
+        _message.value = DetailMessage(app.getString(R.string.deploy_keys_new_token, created.token), isError = false)
         _keys.value = client.listKeys()
     }
 
@@ -132,7 +134,7 @@ class DeployServerDetailViewModel(
 
     fun createIngestToken(label: String) = runAction { client ->
         val created = client.createIngestToken(label)
-        _message.value = DetailMessage("Ingest token: ${created.token}", isError = false)
+        _message.value = DetailMessage(app.getString(R.string.deploy_settings_ingest_token_issued, created.token), isError = false)
         _ingestTokens.value = client.listIngestTokens()
     }
 
@@ -145,7 +147,7 @@ class DeployServerDetailViewModel(
         val client = adminClient ?: return
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { block(client) }
-                .onFailure { _message.value = DetailMessage(it.message ?: "request failed", isError = true) }
+                .onFailure { _message.value = DetailMessage(it.message ?: app.getString(R.string.deploy_generic_error), isError = true) }
         }
     }
 }
@@ -156,7 +158,7 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
     val app = LocalOpenFluxApp.current
     val viewModel: DeployServerDetailViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { DeployServerDetailViewModel(app.deployServerRepository, serverId) }
+            initializer { DeployServerDetailViewModel(app.deployServerRepository, serverId, app) }
         },
     )
     LaunchedEffect(serverId) { viewModel.load() }
@@ -169,9 +171,8 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
     var tabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(
         R.string.deploy_detail_tab_log,
-        R.string.deploy_detail_tab_nodes,
         R.string.deploy_detail_tab_keys,
-        R.string.deploy_detail_tab_ingest,
+        R.string.deploy_detail_tab_settings,
     )
 
     Scaffold(
@@ -229,9 +230,8 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
 
             when (tabIndex) {
                 0 -> DeployLogTab(serverId)
-                1 -> DeployNodesTab(viewModel)
-                2 -> DeployKeysTab(viewModel)
-                3 -> DeployIngestTab(viewModel)
+                1 -> DeployKeysTab(viewModel)
+                2 -> DeploySettingsTab(viewModel)
             }
         }
     }

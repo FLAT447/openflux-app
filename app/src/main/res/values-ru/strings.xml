@@ -87,14 +87,8 @@
     <string name="deploy_detail_admin_token">Токен администратора: %1$s</string>
     <string name="deploy_detail_log_title">Лог</string>
     <string name="deploy_detail_tab_log">Лог</string>
-    <string name="deploy_detail_tab_nodes">Ноды</string>
     <string name="deploy_detail_tab_keys">Ключи</string>
-    <string name="deploy_detail_tab_ingest">Ingest-токены</string>
-
-    <string name="deploy_nodes_create">Зарегистрировать ноду</string>
-    <string name="deploy_nodes_empty">Пока нет нод.</string>
-    <string name="deploy_nodes_rotate_token">Обновить токен</string>
-    <string name="deploy_nodes_new_token">Новый токен ноды (показан один раз): %1$s</string>
+    <string name="deploy_detail_tab_settings">Настройки</string>
 
     <string name="deploy_keys_create">Создать ключ</string>
     <string name="deploy_keys_empty">Пока нет ключей.</string>
@@ -102,15 +96,33 @@
     <string name="deploy_keys_doc_url">Ссылка на Yandex Docs</string>
     <string name="deploy_keys_traffic_limit_gb">Лимит трафика, ГБ (пусто = без лимита)</string>
     <string name="deploy_keys_owner_ref">Владелец (необязательно)</string>
-    <string name="deploy_keys_new_token">Новый токен ключа (показан один раз): %1$s</string>
+    <string name="deploy_keys_new_token">Токен ключа (показан один раз): %1$s</string>
     <string name="deploy_keys_enable">Включить</string>
     <string name="deploy_keys_disable">Отключить</string>
     <string name="deploy_keys_delete">Удалить</string>
 
-    <string name="deploy_ingest_create">Создать ingest-токен</string>
-    <string name="deploy_ingest_empty">Пока нет ingest-токенов.</string>
-    <string name="deploy_ingest_label">Название</string>
-    <string name="deploy_ingest_new_token">Новый ingest-токен (показан один раз): %1$s</string>
+    <string name="deploy_settings_node_section">Нода этого сервера</string>
+    <string name="deploy_settings_node_status">Статус: %1$s</string>
+    <string name="deploy_settings_node_status_active">активна</string>
+    <string name="deploy_settings_node_status_disabled">отключена</string>
+    <string name="deploy_settings_node_max_keys">Лимит ключей: %1$d</string>
+    <string name="deploy_settings_node_heartbeat">На связи: %1$s</string>
+    <string name="deploy_settings_node_never">ещё не выходила на связь</string>
+    <string name="deploy_settings_node_missing">Нода ещё не зарегистрирована на этом сервере.</string>
+    <string name="deploy_settings_register_node">Зарегистрировать ноду</string>
+    <string name="deploy_settings_rotate_token">Обновить токен ноды</string>
+    <string name="deploy_settings_node_token_issued">Токен ноды (показан один раз): %1$s</string>
+
+    <string name="deploy_settings_ingest_section">Автоматическая выдача ключей</string>
+    <string name="deploy_settings_ingest_hint">Для внешних сервисов (например, бота или магазина), которые сами создают ключи через API.</string>
+    <string name="deploy_settings_ingest_create">Создать токен</string>
+    <string name="deploy_settings_ingest_empty">Пока нет токенов.</string>
+    <string name="deploy_settings_ingest_label">Название</string>
+    <string name="deploy_settings_ingest_token_issued">Токен для интеграции (показан один раз): %1$s</string>
+    <string name="deploy_settings_ingest_enable">Включить</string>
+    <string name="deploy_settings_ingest_disable">Отключить</string>
+
+    <string name="deploy_generic_error">Не удалось выполнить запрос</string>
 
     <string name="settings_title">Настройки</string>
     <string name="settings_start_on_boot">Подключаться при загрузке устройства</string>
