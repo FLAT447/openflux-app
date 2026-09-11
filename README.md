@@ -77,12 +77,19 @@ payload (before base64url-encoding, no padding):
   "mode": "key",
   "control_url": "https://control.example.com",
   "key_token": "key_...",
+  "transport": "yandex",
   "doc_url": "",
+  "max_token": "",
+  "max_uid": 0,
   "mtu": 1400,
   "dns_upstream": "77.88.8.8",
   "auto_reconnect": true
 }
 ```
+
+`transport` (`"yandex"` or `"max"`) and `max_token`/`max_uid` only matter when `mode` is `"manual"` - see
+`ManualTransport` in `data/Profile.kt`. A `"key"`-mode profile's transport comes from controlplane
+itself, not the link.
 
 `ProfileDeepLink.buildUri(profile)` builds the matching URI from a `Profile`, for whatever
 generates these links (e.g. the controlplane admin panel or the ingest API's response).

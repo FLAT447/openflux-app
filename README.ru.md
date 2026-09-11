@@ -80,12 +80,19 @@ VPN-соединение). Секреты (токен ключа / ссылка 
   "mode": "key",
   "control_url": "https://control.example.com",
   "key_token": "key_...",
+  "transport": "yandex",
   "doc_url": "",
+  "max_token": "",
+  "max_uid": 0,
   "mtu": 1400,
   "dns_upstream": "77.88.8.8",
   "auto_reconnect": true
 }
 ```
+
+`transport` (`"yandex"` или `"max"`) и `max_token`/`max_uid` имеют значение только при
+`mode: "manual"` — см. `ManualTransport` в `data/Profile.kt`. У профиля с `mode: "key"` транспорт
+приходит от самого controlplane, а не из ссылки.
 
 `ProfileDeepLink.buildUri(profile)` строит такую же ссылку из `Profile` — для всего, что должно их
 генерировать (например, панель управления controlplane или ответ ingest API).

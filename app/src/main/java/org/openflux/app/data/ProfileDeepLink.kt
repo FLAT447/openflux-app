@@ -36,7 +36,10 @@ object ProfileDeepLink {
             put("mode", if (profile.mode == ProfileMode.MANUAL) "manual" else "key")
             put("control_url", profile.controlUrl)
             put("key_token", profile.keyToken)
+            put("transport", if (profile.manualTransport == ManualTransport.MAX) "max" else "yandex")
             put("doc_url", profile.docUrl)
+            put("max_token", profile.maxToken)
+            put("max_uid", profile.maxUid)
             put("mtu", profile.mtu)
             put("dns_upstream", profile.dnsUpstream)
             put("auto_reconnect", profile.autoReconnect)
@@ -54,7 +57,10 @@ object ProfileDeepLink {
             mode = if (json.optString("mode") == "manual") ProfileMode.MANUAL else ProfileMode.KEY,
             controlUrl = json.optString("control_url", ""),
             keyToken = json.optString("key_token", ""),
+            manualTransport = if (json.optString("transport") == "max") ManualTransport.MAX else ManualTransport.YANDEX,
             docUrl = json.optString("doc_url", ""),
+            maxToken = json.optString("max_token", ""),
+            maxUid = json.optLong("max_uid", 0),
             mtu = json.optInt("mtu", 1400),
             dnsUpstream = json.optString("dns_upstream", "77.88.8.8"),
             autoReconnect = json.optBoolean("auto_reconnect", true),
