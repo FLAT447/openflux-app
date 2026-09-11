@@ -1,5 +1,6 @@
 package org.openflux.app.vpn
 
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,6 +45,10 @@ enum class TunnelLogKind {
 }
 
 data class TunnelLogEntry(
+    // Identifies this entry for LazyColumn/remember keys - timestampMillis
+    // itself can collide, since a background reconnect and the lifecycle
+    // callback it triggers can land in the same millisecond.
+    val id: Long,
     val timestampMillis: Long,
     val kind: TunnelLogKind,
     val attempt: Int = 0,
@@ -53,6 +58,7 @@ data class TunnelLogEntry(
 )
 
 private const val MAX_LOG_ENTRIES = 500
+private val nextLogEntryId = AtomicLong(0)
 
 /**
  * Implements the gomobile-bound `mobile.Callback` interface (see
@@ -93,11 +99,13 @@ class MobileCallback : Callback {
     override fun onLogEvent(code: String, detail: String) {
         val entry = when (code) {
             "connecting" -> TunnelLogEntry(
+                id = nextLogEntryId.getAndIncrement(),
                 timestampMillis = System.currentTimeMillis(),
                 kind = TunnelLogKind.ATTEMPT_CONNECTING,
                 attempt = detail.toIntOrNull() ?: 0,
             )
             "connected" -> TunnelLogEntry(
+                id = nextLogEntryId.getAndIncrement(),
                 timestampMillis = System.currentTimeMillis(),
                 kind = TunnelLogKind.ATTEMPT_CONNECTED,
                 attempt = detail.toIntOrNull() ?: 0,
@@ -108,6 +116,7 @@ class MobileCallback : Callback {
                 // are ours to split on (see transport.EventRetrying's doc).
                 val parts = detail.split("|", limit = 4)
                 TunnelLogEntry(
+                    id = nextLogEntryId.getAndIncrement(),
                     timestampMillis = System.currentTimeMillis(),
                     kind = TunnelLogKind.ATTEMPT_RETRY,
                     attempt = parts.getOrNull(0)?.toIntOrNull() ?: 0,
@@ -130,7 +139,14 @@ class MobileCallback : Callback {
             else -> TunnelLogKind.ERROR
         }
         val detail = if (kind == TunnelLogKind.ERROR) status.removePrefix("error:") else ""
-        appendLog(TunnelLogEntry(timestampMillis = System.currentTimeMillis(), kind = kind, detail = detail))
+        appendLog(
+            TunnelLogEntry(
+                id = nextLogEntryId.getAndIncrement(),
+                timestampMillis = System.currentTimeMillis(),
+                kind = kind,
+                detail = detail,
+            ),
+        )
     }
 
     private fun appendLog(entry: TunnelLogEntry) {

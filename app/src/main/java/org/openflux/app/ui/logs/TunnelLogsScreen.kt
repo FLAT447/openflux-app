@@ -74,7 +74,7 @@ fun TunnelLogsScreen() {
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(top = 8.dp)) {
-                items(entries.asReversed(), key = { it.timestampMillis }) { entry -> LogRow(entry) }
+                items(entries.asReversed(), key = { it.id }) { entry -> LogRow(entry) }
             }
         }
     }
@@ -86,7 +86,7 @@ private fun LogRow(entry: TunnelLogEntry) {
     // ERROR already inlines entry.detail into its own logText() line, so
     // only offer to expand it here when it's otherwise hidden (ATTEMPT_RETRY).
     val hasHiddenDetail = entry.detail.isNotBlank() && entry.kind != TunnelLogKind.ERROR
-    var expanded by remember(entry.timestampMillis) { mutableStateOf(false) }
+    var expanded by remember(entry.id) { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
