@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -105,7 +106,13 @@ fun OpenFluxNavHost(
                             }
                         },
                         icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(stringResourceCompat(tab.labelRes)) },
+                        label = {
+                            Text(
+                                stringResourceCompat(tab.labelRes),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
                     )
                 }
             }

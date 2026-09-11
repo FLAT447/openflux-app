@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.OpenFlux" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+      Only covers the brief window before Compose attaches (and any
+      system chrome Compose doesn't repaint itself) - OpenFluxTheme in
+      Theme.kt is the real source of truth and recolors the status/nav
+      bars to match at runtime. Matches LightColors.background there;
+      see values-night/themes.xml for the dark counterpart.
+    -->
+    <style name="Theme.OpenFlux" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#F7F9FC</item>
+        <item name="android:statusBarColor">#F7F9FC</item>
+        <item name="android:navigationBarColor">#F7F9FC</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
 </resources>
