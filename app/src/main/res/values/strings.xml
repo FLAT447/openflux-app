@@ -85,6 +85,7 @@
     <string name="deploy_detail_deploying">Deploying…</string>
     <string name="deploy_detail_panel_url">Panel: %1$s</string>
     <string name="deploy_detail_admin_token">Admin token: %1$s</string>
+    <string name="deploy_detail_node_token">Node API token (for the exit-node engine): %1$s</string>
     <string name="deploy_detail_log_title">Log</string>
     <string name="deploy_detail_tab_log">Log</string>
     <string name="deploy_detail_tab_keys">Keys</string>

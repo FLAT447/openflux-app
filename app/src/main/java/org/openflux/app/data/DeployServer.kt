@@ -23,7 +23,7 @@ data class DeployServer(
     val sshPassword: String = "",
     val sshPrivateKeyPem: String = "",
     val sshPassphrase: String = "",
-    val tlsMode: TlsMode = TlsMode.DOMAIN,
+    val tlsMode: TlsMode = TlsMode.IP,
     val domain: String = "",
     val email: String = "",
     val repoUrl: String = "https://github.com/wlruscfd/openflux-server.git",
@@ -38,6 +38,12 @@ data class DeployServer(
     // is saved, before any deploy has even run.
     val adminToken: String = "",
     val dbPassword: String = "",
+    // Set once install.sh registers this server's node during a deploy -
+    // see DeployManager.OnDeployResult. This is the token an actual
+    // exit-node engine process needs (--node-token) to serve traffic for
+    // this controlplane; it's generated remotely and shown exactly once,
+    // so this is the only copy the app ever has of it.
+    val nodeToken: String = "",
     val knownHostKeyFingerprint: String = "",
     val lastDeployStatus: DeployStatus = DeployStatus.NONE,
     val lastDeployAt: Long = 0,

@@ -85,6 +85,7 @@
     <string name="deploy_detail_deploying">Разворачивается…</string>
     <string name="deploy_detail_panel_url">Панель: %1$s</string>
     <string name="deploy_detail_admin_token">Токен администратора: %1$s</string>
+    <string name="deploy_detail_node_token">API-токен ноды (для exit-движка): %1$s</string>
     <string name="deploy_detail_log_title">Лог</string>
     <string name="deploy_detail_tab_log">Лог</string>
     <string name="deploy_detail_tab_keys">Ключи</string>

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -200,10 +201,23 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
             }
             server?.let { s ->
                 if (status == DeployStatus.SUCCESS) {
-                    Text(
-                        stringResource(R.string.deploy_detail_panel_url, s.baseUrl + "/admin/"),
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    )
+                    Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        SelectionContainer {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(stringResource(R.string.deploy_detail_panel_url, s.baseUrl + "/admin/"))
+                                Text(
+                                    stringResource(R.string.deploy_detail_admin_token, s.adminToken),
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                                if (s.nodeToken.isNotBlank()) {
+                                    Text(
+                                        stringResource(R.string.deploy_detail_node_token, s.nodeToken),
+                                        modifier = Modifier.padding(top = 4.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

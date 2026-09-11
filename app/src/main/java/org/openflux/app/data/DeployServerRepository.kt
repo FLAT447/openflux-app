@@ -60,6 +60,7 @@ class DeployServerRepository(
                 sshPassphrase = server.sshPassphrase,
                 adminToken = adminToken,
                 dbPassword = dbPassword,
+                nodeToken = existingSecrets?.nodeToken.orEmpty(),
             ),
         )
         return server.copy(id = id, adminToken = adminToken, dbPassword = dbPassword)
@@ -72,6 +73,11 @@ class DeployServerRepository(
 
     suspend fun recordDeployResult(id: String, status: DeployStatus, hostKeyFingerprint: String) {
         dao.recordDeployResult(id, status.name.lowercase(), System.currentTimeMillis(), hostKeyFingerprint)
+    }
+
+    /** Called once a deploy's install.sh reports a freshly-registered node's token. */
+    suspend fun recordNodeToken(id: String, nodeToken: String) {
+        secrets.saveNodeToken(id, nodeToken)
     }
 
     private fun DeployServerEntity.toDomain(s: DeployServerSecrets): DeployServer = DeployServer(
@@ -95,6 +101,7 @@ class DeployServerRepository(
         nodeMaxKeys = nodeMaxKeys,
         adminToken = s.adminToken,
         dbPassword = s.dbPassword,
+        nodeToken = s.nodeToken,
         knownHostKeyFingerprint = knownHostKeyFingerprint,
         lastDeployStatus = runCatching { DeployStatus.valueOf(lastDeployStatus.uppercase()) }.getOrDefault(DeployStatus.NONE),
         lastDeployAt = lastDeployAt,

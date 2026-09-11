@@ -82,6 +82,12 @@ object DeployManager {
             override fun onHostKeyFingerprint(fp: String) {
                 fingerprint = fp
             }
+
+            override fun onDeployResult(panelURL: String, adminToken: String, nodeToken: String) {
+                if (nodeToken.isNotBlank()) {
+                    scope.launch { repository.recordNodeToken(id, nodeToken) }
+                }
+            }
         }
 
         val succeeded = try {

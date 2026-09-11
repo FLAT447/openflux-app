@@ -33,7 +33,13 @@ class DeployServerSecretsStore(context: Context) {
             .putString(key(id, "ssh_passphrase"), secrets.sshPassphrase)
             .putString(key(id, "admin_token"), secrets.adminToken)
             .putString(key(id, "db_password"), secrets.dbPassword)
+            .putString(key(id, "node_token"), secrets.nodeToken)
             .apply()
+    }
+
+    /** Updates just the node token, e.g. once a deploy reports one - see DeployManager. */
+    fun saveNodeToken(id: String, nodeToken: String) {
+        prefs.edit().putString(key(id, "node_token"), nodeToken).apply()
     }
 
     fun load(id: String): DeployServerSecrets = DeployServerSecrets(
@@ -42,6 +48,7 @@ class DeployServerSecretsStore(context: Context) {
         sshPassphrase = prefs.getString(key(id, "ssh_passphrase"), "") ?: "",
         adminToken = prefs.getString(key(id, "admin_token"), "") ?: "",
         dbPassword = prefs.getString(key(id, "db_password"), "") ?: "",
+        nodeToken = prefs.getString(key(id, "node_token"), "") ?: "",
     )
 
     fun delete(id: String) {
@@ -51,6 +58,7 @@ class DeployServerSecretsStore(context: Context) {
             .remove(key(id, "ssh_passphrase"))
             .remove(key(id, "admin_token"))
             .remove(key(id, "db_password"))
+            .remove(key(id, "node_token"))
             .apply()
     }
 
@@ -63,4 +71,5 @@ data class DeployServerSecrets(
     val sshPassphrase: String = "",
     val adminToken: String = "",
     val dbPassword: String = "",
+    val nodeToken: String = "",
 )
