@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import mobile.Mobile
+import mobile.Protector
 import org.openflux.app.MainActivity
 import org.openflux.app.OpenFluxApplication
 import org.openflux.app.R
@@ -24,11 +25,23 @@ import org.openflux.app.data.toStartTunnelConfigJson
  * time (matches how a device has one active VPN connection), so tunnel
  * state - and the [MobileCallback] the UI observes - lives on the
  * companion object rather than needing a bound-service/Messenger dance.
+ *
+ * Also implements Go's mobile.Protector: once the tunnel is up, Android
+ * routes ALL outbound traffic - including this app's own - through it by
+ * default, so without exempting the transport's own sockets (to the doc,
+ * to DNS, ...) via VpnService.protect(fd), the transport ends up trying to
+ * dial itself and deadlocks. VpnService already declares a same-signature
+ * protect(fd: Int): Boolean, which satisfies Protector with no extra code.
  */
-class OpenFluxVpnService : VpnService() {
+class OpenFluxVpnService : VpnService(), Protector {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     private var establishedFd: Int? = null
+
+    // gomobile binds Go's `int` to a Java/Kotlin `long` (Go's int width is
+    // platform-dependent), so mobile.Protector.protect takes a Long here
+    // even though VpnService.protect itself takes an Int.
+    override fun protect(fd: Long): Boolean = super.protect(fd.toInt())
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -96,7 +109,7 @@ class OpenFluxVpnService : VpnService() {
             establishedFd = fd
 
             try {
-                Mobile.startTunnel(fd.toLong(), profile.toStartTunnelConfigJson(), callback)
+                Mobile.startTunnel(fd.toLong(), profile.toStartTunnelConfigJson(), this@OpenFluxVpnService, callback)
             } catch (t: Throwable) {
                 callback.onStatus("error:${t.message}")
                 stopSelf()
