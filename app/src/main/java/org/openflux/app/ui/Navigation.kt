@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -31,12 +32,14 @@ import org.openflux.app.ui.deploy.DeployListScreen
 import org.openflux.app.ui.deploy.DeployServerDetailScreen
 import org.openflux.app.ui.deploy.DeployServerEditScreen
 import org.openflux.app.ui.home.HomeScreen
+import org.openflux.app.ui.logs.TunnelLogsScreen
 import org.openflux.app.ui.profiles.ProfileEditScreen
 import org.openflux.app.ui.profiles.ProfileListScreen
 import org.openflux.app.ui.settings.SettingsScreen
 
 private sealed class Destination(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     data object Home : Destination("home", R.string.nav_home, Icons.Filled.Home)
+    data object Logs : Destination("logs", R.string.nav_logs, Icons.Filled.Info)
     data object Profiles : Destination("profiles", R.string.nav_profiles, Icons.Filled.List)
     data object Deploy : Destination("deploy", R.string.nav_deploy, Icons.Filled.Build)
     data object Settings : Destination("settings", R.string.nav_settings, Icons.Filled.Settings)
@@ -56,7 +59,7 @@ fun OpenFluxNavHost(
     onDeepLinkHandled: () -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val tabs = listOf(Destination.Home, Destination.Profiles, Destination.Deploy, Destination.Settings)
+    val tabs = listOf(Destination.Home, Destination.Logs, Destination.Profiles, Destination.Deploy, Destination.Settings)
 
     // Set right before navigating to "profile_edit/new" for an imported
     // link, and cleared as soon as that screen is done with it (saved or
@@ -118,6 +121,9 @@ fun OpenFluxNavHost(
                     onManageProfiles = { navController.navigate(Destination.Profiles.route) },
                     onEditProfile = { id -> navController.navigate("$PROFILE_EDIT_ROUTE/$id") },
                 )
+            }
+            composable(Destination.Logs.route) {
+                TunnelLogsScreen()
             }
             composable(Destination.Profiles.route) {
                 ProfileListScreen(

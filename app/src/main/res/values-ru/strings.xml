@@ -3,6 +3,7 @@
     <string name="app_name">OpenFlux</string>
 
     <string name="nav_home">Главная</string>
+    <string name="nav_logs">Логи</string>
     <string name="nav_profiles">Профили</string>
     <string name="nav_deploy">Деплой</string>
     <string name="nav_settings">Настройки</string>
@@ -17,6 +18,21 @@
     <string name="home_active_profile">Активный профиль: %1$s</string>
     <string name="home_traffic_sent">Отправлено: %1$s</string>
     <string name="home_traffic_received">Получено: %1$s</string>
+
+    <string name="logs_clear">Очистить</string>
+    <string name="logs_empty">Логов пока нет. Они появятся при первой попытке подключения.</string>
+    <string name="logs_starting">Запуск туннеля…</string>
+    <string name="logs_started">Туннель поднят</string>
+    <string name="logs_stopped">Туннель остановлен</string>
+    <string name="logs_error">Ошибка: %1$s</string>
+    <string name="logs_attempt_connecting">Попытка подключения №%1$d…</string>
+    <string name="logs_attempt_connected">Подключено (попытка №%1$d)</string>
+    <string name="logs_attempt_retry">Попытка №%1$d не удалась (%2$s). Повтор через %3$d с.</string>
+    <string name="logs_reason_fetch_failed">не удалось получить данные документа</string>
+    <string name="logs_reason_dial_failed">не удалось установить соединение</string>
+    <string name="logs_reason_handshake_failed">сервер не подтвердил подключение</string>
+    <string name="logs_reason_send_failed">не удалось отправить данные для входа</string>
+    <string name="logs_reason_read_error">соединение прервано</string>
 
     <string name="profiles_title">Профили</string>
     <string name="profiles_add">Добавить профиль</string>

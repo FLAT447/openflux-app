@@ -3,6 +3,7 @@
     <string name="app_name">OpenFlux</string>
 
     <string name="nav_home">Home</string>
+    <string name="nav_logs">Logs</string>
     <string name="nav_profiles">Profiles</string>
     <string name="nav_deploy">Deploy</string>
     <string name="nav_settings">Settings</string>
@@ -17,6 +18,21 @@
     <string name="home_active_profile">Active profile: %1$s</string>
     <string name="home_traffic_sent">Sent: %1$s</string>
     <string name="home_traffic_received">Received: %1$s</string>
+
+    <string name="logs_clear">Clear</string>
+    <string name="logs_empty">No log entries yet. They\'ll appear on the first connection attempt.</string>
+    <string name="logs_starting">Starting tunnel…</string>
+    <string name="logs_started">Tunnel is up</string>
+    <string name="logs_stopped">Tunnel stopped</string>
+    <string name="logs_error">Error: %1$s</string>
+    <string name="logs_attempt_connecting">Connection attempt #%1$d…</string>
+    <string name="logs_attempt_connected">Connected (attempt #%1$d)</string>
+    <string name="logs_attempt_retry">Attempt #%1$d failed (%2$s). Retrying in %3$ds.</string>
+    <string name="logs_reason_fetch_failed">couldn\'t fetch the document</string>
+    <string name="logs_reason_dial_failed">couldn\'t open the connection</string>
+    <string name="logs_reason_handshake_failed">the server didn\'t confirm the connection</string>
+    <string name="logs_reason_send_failed">couldn\'t send sign-in data</string>
+    <string name="logs_reason_read_error">the connection was interrupted</string>
 
     <string name="profiles_title">Profiles</string>
     <string name="profiles_add">Add profile</string>
