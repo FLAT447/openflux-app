@@ -33,6 +33,8 @@
     <string name="logs_reason_handshake_failed">сервер не подтвердил подключение</string>
     <string name="logs_reason_send_failed">не удалось отправить данные для входа</string>
     <string name="logs_reason_read_error">соединение прервано</string>
+    <string name="logs_expand_detail">Показать подробности</string>
+    <string name="logs_collapse_detail">Скрыть подробности</string>
 
     <string name="profiles_title">Профили</string>
     <string name="profiles_add">Добавить профиль</string>

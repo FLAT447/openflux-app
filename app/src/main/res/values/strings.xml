@@ -33,6 +33,8 @@
     <string name="logs_reason_handshake_failed">the server didn\'t confirm the connection</string>
     <string name="logs_reason_send_failed">couldn\'t send sign-in data</string>
     <string name="logs_reason_read_error">the connection was interrupted</string>
+    <string name="logs_expand_detail">Show details</string>
+    <string name="logs_collapse_detail">Hide details</string>
 
     <string name="profiles_title">Profiles</string>
     <string name="profiles_add">Add profile</string>

@@ -103,13 +103,17 @@ class MobileCallback : Callback {
                 attempt = detail.toIntOrNull() ?: 0,
             )
             "retrying" -> {
-                val parts = detail.split("|")
+                // limit=4: the 4th part is the raw underlying error text and
+                // may itself contain "|" - only the first three separators
+                // are ours to split on (see transport.EventRetrying's doc).
+                val parts = detail.split("|", limit = 4)
                 TunnelLogEntry(
                     timestampMillis = System.currentTimeMillis(),
                     kind = TunnelLogKind.ATTEMPT_RETRY,
                     attempt = parts.getOrNull(0)?.toIntOrNull() ?: 0,
                     delaySeconds = parts.getOrNull(1)?.toIntOrNull() ?: 0,
                     reasonCode = parts.getOrNull(2).orEmpty(),
+                    detail = parts.getOrNull(3).orEmpty(),
                 )
             }
             else -> return

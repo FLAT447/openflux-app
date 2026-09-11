@@ -1,5 +1,7 @@
 package org.openflux.app.ui.logs
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
@@ -22,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,7 +74,7 @@ fun TunnelLogsScreen() {
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(top = 8.dp)) {
-                items(entries.asReversed()) { entry -> LogRow(entry) }
+                items(entries.asReversed(), key = { it.timestampMillis }) { entry -> LogRow(entry) }
             }
         }
     }
@@ -76,17 +83,43 @@ fun TunnelLogsScreen() {
 @Composable
 private fun LogRow(entry: TunnelLogEntry) {
     val tone = toneFor(entry.kind)
+    // ERROR already inlines entry.detail into its own logText() line, so
+    // only offer to expand it here when it's otherwise hidden (ATTEMPT_RETRY).
+    val hasHiddenDetail = entry.detail.isNotBlank() && entry.kind != TunnelLogKind.ERROR
+    var expanded by remember(entry.timestampMillis) { mutableStateOf(false) }
+
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .let { if (hasHiddenDetail) it.clickable { expanded = !expanded } else it }
+            .animateContentSize()
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(tone.icon, contentDescription = null, tint = tone.color, modifier = Modifier.padding(top = 2.dp))
-        Column(Modifier.padding(start = 12.dp)) {
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Text(logText(entry))
             Text(
                 formatTime(entry.timestampMillis),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (expanded && hasHiddenDetail) {
+                Text(
+                    entry.detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
+        if (hasHiddenDetail) {
+            Icon(
+                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = stringResource(
+                    if (expanded) R.string.logs_collapse_detail else R.string.logs_expand_detail,
+                ),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
