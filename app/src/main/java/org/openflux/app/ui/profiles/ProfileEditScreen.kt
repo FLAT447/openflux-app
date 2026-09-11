@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import mobile.Mobile
 import org.openflux.app.LocalOpenFluxApp
 import org.openflux.app.R
+import org.openflux.app.data.ManualTransport
 import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileMode
 import org.openflux.app.data.ProfileRepository
@@ -169,12 +170,43 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                 }
 
                 ProfileMode.MANUAL -> {
-                    OutlinedTextField(
-                        value = current.docUrl,
-                        onValueChange = { profile = current.copy(docUrl = it) },
-                        label = { Text(stringResource(R.string.profile_edit_doc_url)) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    )
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 12.dp)) {
+                        FilterChip(
+                            selected = current.manualTransport == ManualTransport.YANDEX,
+                            onClick = { profile = current.copy(manualTransport = ManualTransport.YANDEX) },
+                            label = { Text(stringResource(R.string.profile_edit_transport_yandex)) },
+                        )
+                        FilterChip(
+                            selected = current.manualTransport == ManualTransport.MAX,
+                            onClick = { profile = current.copy(manualTransport = ManualTransport.MAX) },
+                            label = { Text(stringResource(R.string.profile_edit_transport_max)) },
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
+                    when (current.manualTransport) {
+                        ManualTransport.YANDEX -> {
+                            OutlinedTextField(
+                                value = current.docUrl,
+                                onValueChange = { profile = current.copy(docUrl = it) },
+                                label = { Text(stringResource(R.string.profile_edit_doc_url)) },
+                                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                            )
+                        }
+                        ManualTransport.MAX -> {
+                            OutlinedTextField(
+                                value = current.maxToken,
+                                onValueChange = { profile = current.copy(maxToken = it) },
+                                label = { Text(stringResource(R.string.profile_edit_max_token)) },
+                                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                            )
+                            OutlinedTextField(
+                                value = if (current.maxUid == 0L) "" else current.maxUid.toString(),
+                                onValueChange = { profile = current.copy(maxUid = it.toLongOrNull() ?: 0L) },
+                                label = { Text(stringResource(R.string.profile_edit_max_uid)) },
+                                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                            )
+                        }
+                    }
                 }
             }
 

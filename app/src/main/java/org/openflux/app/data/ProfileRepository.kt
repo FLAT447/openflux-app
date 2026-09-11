@@ -25,6 +25,7 @@ class ProfileRepository(
                 id = id,
                 name = profile.name,
                 mode = profile.mode.name,
+                manualTransport = profile.manualTransport.name,
                 mtu = profile.mtu,
                 dnsUpstream = profile.dnsUpstream,
                 autoReconnect = profile.autoReconnect,
@@ -37,6 +38,8 @@ class ProfileRepository(
                 controlUrl = profile.controlUrl,
                 keyToken = profile.keyToken,
                 docUrl = profile.docUrl,
+                maxToken = profile.maxToken,
+                maxUid = profile.maxUid,
             ),
         )
         return profile.copy(id = id)
@@ -53,7 +56,10 @@ class ProfileRepository(
         mode = runCatching { ProfileMode.valueOf(mode) }.getOrDefault(ProfileMode.MANUAL),
         controlUrl = s.controlUrl,
         keyToken = s.keyToken,
+        manualTransport = runCatching { ManualTransport.valueOf(manualTransport) }.getOrDefault(ManualTransport.YANDEX),
         docUrl = s.docUrl,
+        maxToken = s.maxToken,
+        maxUid = s.maxUid,
         mtu = mtu,
         dnsUpstream = dnsUpstream,
         autoReconnect = autoReconnect,
@@ -73,8 +79,17 @@ fun Profile.toStartTunnelConfigJson(): String = JSONObject().apply {
         }
         ProfileMode.MANUAL -> {
             put("mode", "manual")
-            put("transport", "yandex")
-            put("doc_url", docUrl)
+            when (manualTransport) {
+                ManualTransport.YANDEX -> {
+                    put("transport", "yandex")
+                    put("doc_url", docUrl)
+                }
+                ManualTransport.MAX -> {
+                    put("transport", "max")
+                    put("max_token", maxToken)
+                    put("max_uid", maxUid)
+                }
+            }
         }
     }
     put("mtu", mtu)

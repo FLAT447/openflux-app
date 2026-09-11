@@ -29,6 +29,8 @@ class SecretsStore(context: Context) {
             .putString(key(id, "control_url"), secrets.controlUrl)
             .putString(key(id, "key_token"), secrets.keyToken)
             .putString(key(id, "doc_url"), secrets.docUrl)
+            .putString(key(id, "max_token"), secrets.maxToken)
+            .putLong(key(id, "max_uid"), secrets.maxUid)
             .apply()
     }
 
@@ -36,6 +38,8 @@ class SecretsStore(context: Context) {
         controlUrl = prefs.getString(key(id, "control_url"), "") ?: "",
         keyToken = prefs.getString(key(id, "key_token"), "") ?: "",
         docUrl = prefs.getString(key(id, "doc_url"), "") ?: "",
+        maxToken = prefs.getString(key(id, "max_token"), "") ?: "",
+        maxUid = prefs.getLong(key(id, "max_uid"), 0),
     )
 
     fun delete(id: String) {
@@ -43,6 +47,8 @@ class SecretsStore(context: Context) {
             .remove(key(id, "control_url"))
             .remove(key(id, "key_token"))
             .remove(key(id, "doc_url"))
+            .remove(key(id, "max_token"))
+            .remove(key(id, "max_uid"))
             .apply()
     }
 
@@ -53,4 +59,6 @@ data class ProfileSecrets(
     val controlUrl: String = "",
     val keyToken: String = "",
     val docUrl: String = "",
+    val maxToken: String = "",
+    val maxUid: Long = 0,
 )

@@ -13,6 +13,7 @@ data class ProfileEntity(
     @PrimaryKey val id: String,
     val name: String,
     val mode: String, // ProfileMode.name
+    val manualTransport: String, // ManualTransport.name; only meaningful when mode == MANUAL
     val mtu: Int,
     val dnsUpstream: String,
     val autoReconnect: Boolean,
