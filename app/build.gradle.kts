@@ -71,6 +71,10 @@ dependencies {
     // controlplane's admin API (key/node/ingest-token management).
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
+    // QR code generation only (no camera/scanning) for sharing a profile's
+    // deep link - see ui/profiles/QrCode.kt.
+    implementation("com.google.zxing:core:3.5.3")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }

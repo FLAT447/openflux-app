@@ -47,6 +47,8 @@
     <string name="profile_edit_mode_key">Access key</string>
     <string name="profile_edit_mode_manual">Manual</string>
     <string name="profile_edit_control_url">Server URL</string>
+    <string name="profile_edit_control_url_placeholder">https://your-server.example</string>
+    <string name="profile_edit_control_url_hint">The controlplane\'s base address only - no /admin/, no path. Same host as the deploy panel URL.</string>
     <string name="profile_edit_key_token">Access key</string>
     <string name="profile_edit_check_key">Check key</string>
     <string name="profile_edit_doc_url">Yandex Docs URL</string>
@@ -60,6 +62,12 @@
     <string name="profile_edit_auto_reconnect">Reconnect automatically</string>
     <string name="profile_edit_save">Save</string>
     <string name="profile_edit_cancel">Cancel</string>
+
+    <string name="profile_share_title">Share profile</string>
+    <string name="profile_share_qr_error">The link is too long to fit in a QR code, but you can still copy or send it below.</string>
+    <string name="profile_share_send">Send</string>
+    <string name="profile_share_copy">Copy link</string>
+    <string name="profile_share_copied">Link copied</string>
 
     <string name="deploy_title">Deploy</string>
     <string name="deploy_add_server">Add server</string>
