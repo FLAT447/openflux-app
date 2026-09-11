@@ -51,6 +51,7 @@ import org.openflux.app.data.ControlPlaneAdminClient
 import org.openflux.app.data.DeployServer
 import org.openflux.app.data.DeployServerRepository
 import org.openflux.app.data.DeployStatus
+import org.openflux.app.data.KeyToken
 import org.openflux.app.deploy.DeployManager
 
 /** text + whether it represents an error, shown as a dismissible banner. */
@@ -119,13 +120,24 @@ class DeployServerDetailViewModel(
     fun createKey(label: String, docUrl: String, trafficLimitGb: Double?, ownerRef: String) = runAction { client ->
         val bytes = trafficLimitGb?.let { (it * 1024 * 1024 * 1024).toLong() }
         val created = client.createKey(label, docUrl, bytes, ownerRef)
-        _message.value = DetailMessage(app.getString(R.string.deploy_keys_new_token, created.token), isError = false)
+        _message.value = DetailMessage(keyTokenMessage(R.string.deploy_keys_new_token, created), isError = false)
         _keys.value = client.listKeys()
     }
 
     fun setKeyEnabled(id: String, enabled: Boolean) = runAction { client ->
         client.setKeyEnabled(id, enabled)
         _keys.value = client.listKeys()
+    }
+
+    fun rotateKeyToken(id: String) = runAction { client ->
+        val rotated = client.rotateKeyToken(id)
+        _message.value = DetailMessage(keyTokenMessage(R.string.deploy_keys_new_token, rotated), isError = false)
+        _keys.value = client.listKeys()
+    }
+
+    private fun keyTokenMessage(tokenLabelRes: Int, key: KeyToken): String {
+        val base = app.getString(tokenLabelRes, key.token)
+        return if (key.deepLink.isNullOrBlank()) base else base + "\n" + app.getString(R.string.deploy_keys_deep_link, key.deepLink)
     }
 
     fun deleteKey(id: String) = runAction { client ->

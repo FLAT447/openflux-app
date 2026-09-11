@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -98,6 +99,7 @@ fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
                     KeyRow(
                         key = key,
                         onToggleEnabled = { viewModel.setKeyEnabled(key.id, !key.enabled) },
+                        onRotateToken = { viewModel.rotateKeyToken(key.id) },
                         onDelete = { viewModel.deleteKey(key.id) },
                     )
                 }
@@ -107,7 +109,7 @@ fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
 }
 
 @Composable
-private fun KeyRow(key: AdminKey, onToggleEnabled: () -> Unit, onDelete: () -> Unit) {
+private fun KeyRow(key: AdminKey, onToggleEnabled: () -> Unit, onRotateToken: () -> Unit, onDelete: () -> Unit) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -120,6 +122,9 @@ private fun KeyRow(key: AdminKey, onToggleEnabled: () -> Unit, onDelete: () -> U
             }
             OutlinedButton(onClick = onToggleEnabled) {
                 Text(stringResource(if (key.enabled) R.string.deploy_keys_disable else R.string.deploy_keys_enable))
+            }
+            IconButton(onClick = onRotateToken) {
+                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.deploy_keys_rotate_token))
             }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.deploy_keys_delete))

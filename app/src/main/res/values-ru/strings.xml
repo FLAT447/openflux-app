@@ -131,6 +131,8 @@
     <string name="deploy_keys_enable">Включить</string>
     <string name="deploy_keys_disable">Отключить</string>
     <string name="deploy_keys_delete">Удалить</string>
+    <string name="deploy_keys_rotate_token">Обновить токен</string>
+    <string name="deploy_keys_deep_link">Ссылка для приложения: %1$s</string>
 
     <string name="deploy_settings_node_section">Нода этого сервера</string>
     <string name="deploy_settings_node_status">Статус: %1$s</string>

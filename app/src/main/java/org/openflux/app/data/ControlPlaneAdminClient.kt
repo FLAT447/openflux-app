@@ -43,6 +43,15 @@ data class AdminIngestToken(
 data class CreatedWithToken(val id: String, val token: String)
 
 /**
+ * A freshly (re)issued key token - and the deep link built from it, if the
+ * server has CONTROLPLANE_PUBLIC_URL configured - shown once, same as
+ * CreatedWithToken. Used by both key creation and key token rotation,
+ * unlike CreatedWithToken which node/ingest-token creation also share and
+ * which never carries a deep link.
+ */
+data class KeyToken(val token: String, val deepLink: String?)
+
+/**
  * Talks to controlplane's admin JSON API under `/v1/admin/` (see
  * server/controlplane/internal/api/admin_handlers.go and
  * ingest_handlers.go) - the exact same endpoints the web admin panel
@@ -95,7 +104,7 @@ class ControlPlaneAdminClient(baseUrl: String, private val adminToken: String) {
         }
     }
 
-    fun createKey(label: String, docUrl: String, trafficLimitBytes: Long?, ownerRef: String): CreatedWithToken {
+    fun createKey(label: String, docUrl: String, trafficLimitBytes: Long?, ownerRef: String): KeyToken {
         val body = JSONObject()
             .put("label", label)
             .put("doc_url", docUrl)
@@ -103,7 +112,18 @@ class ControlPlaneAdminClient(baseUrl: String, private val adminToken: String) {
             .put("owner_ref", ownerRef)
         if (trafficLimitBytes != null) body.put("traffic_limit_bytes", trafficLimitBytes)
         val resp = requestObject("POST", "/v1/admin/keys", body)!!
-        return CreatedWithToken(resp.getString("id"), resp.getString("token"))
+        return KeyToken(resp.getString("token"), resp.optString("deep_link").ifBlank { null })
+    }
+
+    /**
+     * Issues a fresh token for an existing key - the only way to get a
+     * usable token (or its deep link) for a key whose original token from
+     * creation is already gone, since it's only ever stored hashed. Every
+     * other field of the key (label, doc_url, limits, stats) is untouched.
+     */
+    fun rotateKeyToken(id: String): KeyToken {
+        val resp = requestObject("POST", "/v1/admin/keys/$id/rotate-token")!!
+        return KeyToken(resp.getString("token"), resp.optString("deep_link").ifBlank { null })
     }
 
     fun setKeyEnabled(id: String, enabled: Boolean) {

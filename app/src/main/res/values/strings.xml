@@ -131,6 +131,8 @@
     <string name="deploy_keys_enable">Enable</string>
     <string name="deploy_keys_disable">Disable</string>
     <string name="deploy_keys_delete">Delete</string>
+    <string name="deploy_keys_rotate_token">Rotate token</string>
+    <string name="deploy_keys_deep_link">App link: %1$s</string>
 
     <string name="deploy_settings_node_section">This server\'s node</string>
     <string name="deploy_settings_node_status">Status: %1$s</string>
