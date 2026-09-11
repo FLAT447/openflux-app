@@ -152,6 +152,16 @@
     <string name="settings_start_on_boot">Connect on device boot</string>
     <string name="settings_default_mtu">Default MTU for new profiles</string>
     <string name="settings_default_dns">Default DNS server for new profiles</string>
+    <string name="settings_split_tunnel">Split tunneling</string>
+
+    <string name="split_tunnel_title">Split tunneling</string>
+    <string name="split_tunnel_hint">Choose which apps use the tunnel. Applies to every profile.</string>
+    <string name="split_tunnel_mode_off">Off</string>
+    <string name="split_tunnel_mode_exclude">Bypass selected</string>
+    <string name="split_tunnel_mode_include">Only selected</string>
+    <string name="split_tunnel_filter">Search apps</string>
+    <string name="split_tunnel_loading">Loading installed apps…</string>
+    <string name="split_tunnel_off_hint">All apps use the tunnel.</string>
 
     <string name="vpn_notification_channel">OpenFlux VPN</string>
     <string name="vpn_notification_connected">Connected via %1$s</string>

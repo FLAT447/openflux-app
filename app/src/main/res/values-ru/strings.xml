@@ -152,6 +152,16 @@
     <string name="settings_start_on_boot">Подключаться при загрузке устройства</string>
     <string name="settings_default_mtu">MTU по умолчанию для новых профилей</string>
     <string name="settings_default_dns">DNS по умолчанию для новых профилей</string>
+    <string name="settings_split_tunnel">Раздельное туннелирование</string>
+
+    <string name="split_tunnel_title">Раздельное туннелирование</string>
+    <string name="split_tunnel_hint">Выберите, какие приложения используют туннель. Применяется ко всем профилям.</string>
+    <string name="split_tunnel_mode_off">Выключено</string>
+    <string name="split_tunnel_mode_exclude">Исключить выбранные</string>
+    <string name="split_tunnel_mode_include">Только выбранные</string>
+    <string name="split_tunnel_filter">Поиск приложений</string>
+    <string name="split_tunnel_loading">Загрузка списка приложений…</string>
+    <string name="split_tunnel_off_hint">Все приложения используют туннель.</string>
 
     <string name="vpn_notification_channel">OpenFlux VPN</string>
     <string name="vpn_notification_connected">Подключено через %1$s</string>

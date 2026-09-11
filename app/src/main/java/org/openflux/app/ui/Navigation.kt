@@ -36,6 +36,7 @@ import org.openflux.app.ui.logs.TunnelLogsScreen
 import org.openflux.app.ui.profiles.ProfileEditScreen
 import org.openflux.app.ui.profiles.ProfileListScreen
 import org.openflux.app.ui.settings.SettingsScreen
+import org.openflux.app.ui.settings.SplitTunnelScreen
 
 private sealed class Destination(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     data object Home : Destination("home", R.string.nav_home, Icons.Filled.Home)
@@ -50,6 +51,7 @@ private const val PROFILE_ID_ARG = "profileId"
 private const val DEPLOY_EDIT_ROUTE = "deploy_edit"
 private const val DEPLOY_DETAIL_ROUTE = "deploy_detail"
 private const val DEPLOY_ID_ARG = "serverId"
+private const val SPLIT_TUNNEL_ROUTE = "split_tunnel"
 
 @Composable
 fun OpenFluxNavHost(
@@ -178,7 +180,10 @@ fun OpenFluxNavHost(
                 }
             }
             composable(Destination.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(onOpenSplitTunnel = { navController.navigate(SPLIT_TUNNEL_ROUTE) })
+            }
+            composable(SPLIT_TUNNEL_ROUTE) {
+                SplitTunnelScreen(onDone = { navController.popBackStack() })
             }
         }
     }

@@ -5,14 +5,17 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.VpnService
 import androidx.core.app.NotificationCompat
+import android.content.pm.PackageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import mobile.Mobile
 import org.openflux.app.MainActivity
 import org.openflux.app.OpenFluxApplication
 import org.openflux.app.R
+import org.openflux.app.data.SplitTunnelMode
 import org.openflux.app.data.toStartTunnelConfigJson
 
 /**
@@ -66,6 +69,8 @@ class OpenFluxVpnService : VpnService() {
                 .addRoute("::", 0)
                 .addDnsServer(profile.dnsUpstream)
 
+            applySplitTunneling(app, builder)
+
             val pfd = try {
                 builder.establish()
             } catch (t: Throwable) {
@@ -93,6 +98,30 @@ class OpenFluxVpnService : VpnService() {
             }
 
             updateNotification(getString(R.string.vpn_notification_connected, profile.name))
+        }
+    }
+
+    /**
+     * Applies the app-wide (not per-profile - see SettingsRepository) split
+     * tunnel selection to a not-yet-established VpnService.Builder. Silently
+     * skips a package that no longer exists (e.g. uninstalled after being
+     * selected) rather than failing the whole connection over it.
+     */
+    private suspend fun applySplitTunneling(app: OpenFluxApplication, builder: Builder) {
+        val mode = app.settingsRepository.splitTunnelMode.first()
+        if (mode == SplitTunnelMode.OFF) return
+
+        val packages = app.settingsRepository.splitTunnelApps.first()
+        for (packageName in packages) {
+            try {
+                when (mode) {
+                    SplitTunnelMode.EXCLUDE -> builder.addDisallowedApplication(packageName)
+                    SplitTunnelMode.INCLUDE -> builder.addAllowedApplication(packageName)
+                    SplitTunnelMode.OFF -> Unit
+                }
+            } catch (e: PackageManager.NameNotFoundException) {
+                // Selected earlier, uninstalled since - nothing to exclude/include anymore.
+            }
         }
     }
 

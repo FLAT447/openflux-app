@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -40,7 +42,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onOpenSplitTunnel: () -> Unit) {
     val app = LocalOpenFluxApp.current
     val viewModel: SettingsViewModel = viewModel(
         factory = viewModelFactory { initializer { SettingsViewModel(app.settingsRepository) } },
@@ -76,6 +78,12 @@ fun SettingsScreen() {
                 label = { Text(stringResource(R.string.settings_default_dns)) },
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp))
+
+            OutlinedButton(onClick = onOpenSplitTunnel, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.settings_split_tunnel))
+            }
         }
     }
 }
