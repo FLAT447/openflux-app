@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -135,8 +136,20 @@ fun OpenFluxNavHost(
                 TunnelLogsScreen()
             }
             composable(Destination.Profiles.route) {
+                val clipboardManager = LocalClipboardManager.current
                 ProfileListScreen(
-                    onAddProfile = { navController.navigate("$PROFILE_EDIT_ROUTE/new") },
+                    onAddProfile = {
+                        // A deep link copied from the admin panel/API is the
+                        // common case for "+" here - prefill from it when
+                        // there's one on the clipboard, same as tapping an
+                        // openflux://import link directly, and fall back to
+                        // a blank profile otherwise (ProfileDeepLink.parse
+                        // returns null for anything that isn't one, so this
+                        // is never wrong to attempt).
+                        val clipboardText = clipboardManager.getText()?.text
+                        importedProfile = clipboardText?.let { ProfileDeepLink.parse(Uri.parse(it)) }
+                        navController.navigate("$PROFILE_EDIT_ROUTE/new") { launchSingleTop = true }
+                    },
                     onEditProfile = { id -> navController.navigate("$PROFILE_EDIT_ROUTE/$id") },
                 )
             }
