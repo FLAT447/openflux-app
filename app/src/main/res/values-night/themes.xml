@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Dark counterpart of values/themes.xml - matches DarkColors.background in Theme.kt. -->
-    <style name="Theme.OpenFlux" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.OpenFlux" parent="android:Theme.Material.NoActionBar" tools:targetApi="27">
         <item name="android:windowBackground">#0A0E16</item>
         <item name="android:statusBarColor">#0A0E16</item>
         <item name="android:navigationBarColor">#0A0E16</item>

@@ -129,7 +129,6 @@ fun OpenFluxNavHost(
                     onConnectRequested = onConnectRequested,
                     onDisconnectRequested = onDisconnectRequested,
                     onManageProfiles = { navController.navigate(Destination.Profiles.route) },
-                    onEditProfile = { id -> navController.navigate("$PROFILE_EDIT_ROUTE/$id") },
                 )
             }
             composable(Destination.Logs.route) {

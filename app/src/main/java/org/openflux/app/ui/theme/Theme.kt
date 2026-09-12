@@ -1,14 +1,18 @@
 package org.openflux.app.ui.theme
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -100,20 +104,26 @@ private val LightColors = lightColorScheme(
 )
 
 /**
- * Deliberately does not offer Material You dynamic color: deriving every
- * button/text/border color from the device wallpaper meant some wallpapers
- * produced washed-out, barely-visible buttons (and gave up OpenFlux's own
- * brand identity for no real benefit). This is a fixed, hand-picked palette
- * instead, tuned for contrast in both themes, paired with OpenFluxTypography
- * (Inter) and OpenFluxShapes so nothing here falls back to Material3's
- * stock look.
+ * On Android 12+ (API 31), uses Material You dynamic color, deriving the
+ * palette from the device wallpaper via [dynamicLightColorScheme] /
+ * [dynamicDarkColorScheme]. On older devices (or explicitly disabled) falls
+ * back to the fixed, hand-picked OpenFlux palette below, tuned for contrast
+ * in both themes and keeping the controlplane admin panel's blue accent.
  */
 @Composable
 fun OpenFluxTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colors = if (darkTheme) DarkColors else LightColors
+    val colors = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColors
+        else -> LightColors
+    }
 
     // Recolors the system status/nav bars to match instead of leaving them
     // whatever the pre-Compose window theme set (see values*/themes.xml) -
