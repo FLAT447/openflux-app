@@ -11,13 +11,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -185,11 +186,18 @@ private fun DeployServerRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            // A full text OutlinedButton here (Material3's default content
+            // padding is generous, meant for a button standing on its own)
+            // ate so much of the row's width that the name/status Column
+            // above - already weight(1f) and ellipsized - had almost
+            // nothing left to work with. A plain icon button, same as
+            // DeployKeysTab/DeploySettingsTab's row actions, takes a fixed,
+            // small footprint instead.
             if (status == DeployStatus.RUNNING) {
                 CircularProgressIndicator(modifier = Modifier.padding(horizontal = 8.dp))
             } else {
-                OutlinedButton(onClick = onDeployNow) {
-                    Text(stringResource(R.string.deploy_detail_deploy_now))
+                IconButton(onClick = onDeployNow) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.deploy_detail_deploy_now))
                 }
             }
         }
