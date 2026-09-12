@@ -1,23 +1,39 @@
 package org.openflux.app.ui.home
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,7 +50,6 @@ import org.openflux.app.R
 import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileRepository
 import org.openflux.app.data.SettingsRepository
-import org.openflux.app.ui.profiles.ProfileRow
 import org.openflux.app.vpn.OpenFluxVpnService
 import org.openflux.app.vpn.TunnelStatus
 
@@ -69,7 +84,6 @@ fun HomeScreen(
     onConnectRequested: (String) -> Unit,
     onDisconnectRequested: () -> Unit,
     onManageProfiles: () -> Unit,
-    onEditProfile: (String) -> Unit,
 ) {
     val app = LocalOpenFluxApp.current
     val viewModel: HomeViewModel = viewModel(
@@ -84,64 +98,163 @@ fun HomeScreen(
     val channelReady by OpenFluxVpnService.callback.channelReady.collectAsState()
     val stats by OpenFluxVpnService.callback.stats.collectAsState()
     val connected = status is TunnelStatus.Connected || status is TunnelStatus.Connecting
+    val buttonState = when {
+        status is TunnelStatus.Connected && channelReady -> ConnectionButtonState.Connected
+        status is TunnelStatus.Connected -> ConnectionButtonState.Establishing
+        status is TunnelStatus.Connecting -> ConnectionButtonState.Connecting
+        else -> ConnectionButtonState.Idle
+    }
 
+    // Column keeps the profile selector pinned to the very bottom edge
+    // (flush against the nav bar) while the VPN control group sits at the
+    // vertical centre of the remaining space above it.
     Column(
-        modifier = Modifier.fillMaxSize().padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 8.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Text(statusLabel(status, channelReady), style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ConnectionButton(
+                    state = buttonState,
+                    label = statusLabel(status, channelReady),
+                    enabled = activeProfile != null &&
+                        (buttonState == ConnectionButtonState.Idle || buttonState == ConnectionButtonState.Connected),
+                    onClick = {
+                        if (connected) {
+                            onDisconnectRequested()
+                        } else {
+                            activeProfile?.let { onConnectRequested(it.id) }
+                        }
+                    },
+                )
 
-        Text(
-            if (activeProfile != null) {
-                stringResource(R.string.home_active_profile, activeProfile.name)
-            } else {
-                stringResource(R.string.home_no_profile)
-            },
-        )
-        Spacer(Modifier.height(16.dp))
-
-        if (connected) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.home_traffic_sent, formatBytes(stats.bytesSent)))
-                    Text(stringResource(R.string.home_traffic_received, formatBytes(stats.bytesReceived)))
+                Box(
+                    modifier = Modifier.height(24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (connected) {
+                        TrafficLine(sent = stats.bytesSent, received = stats.bytesReceived)
+                    }
                 }
             }
-            Spacer(Modifier.height(16.dp))
         }
 
-        if (connected) {
-            OutlinedButton(onClick = onDisconnectRequested, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.home_disconnect))
-            }
-        } else {
+        // Compact profile picker: a single selector that opens a bottom
+        // sheet listing every profile. Picking one makes it the active
+        // profile - the previous always-visible list pushed the button down
+        // and read as a second screen; this stays a one-tap footer. With no
+        // profiles the button doubles as "Add profile".
+        var sheetOpen by remember { mutableStateOf(false) }
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Button(
-                onClick = { activeProfile?.let { onConnectRequested(it.id) } },
-                enabled = activeProfile != null,
-                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    if (homeState.profiles.isEmpty()) {
+                        onManageProfiles()
+                    } else {
+                        sheetOpen = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                shape = RectangleShape,
             ) {
-                Text(stringResource(R.string.home_connect))
+                Text(
+                    text = when {
+                        activeProfile != null -> activeProfile.name
+                        homeState.profiles.isEmpty() -> stringResource(R.string.profiles_add)
+                        else -> stringResource(R.string.home_profile_selector_select)
+                    },
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+
+            if (sheetOpen) {
+                ProfilePickerSheet(
+                    profiles = homeState.profiles,
+                    activeProfileId = homeState.activeProfileId,
+                    onSelect = {
+                        sheetOpen = false
+                        viewModel.setActive(it)
+                    },
+                    onDismiss = { sheetOpen = false },
+                )
             }
         }
+    }
+}
 
-        Spacer(Modifier.height(24.dp))
+// Bottom sheet (slides up from the bottom edge) that lists every profile and
+// lets the user pick the active one. Opened from the compact selector under
+// the connect button.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfilePickerSheet(
+    profiles: List<Profile>,
+    activeProfileId: String?,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.home_profile_selector_select),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
 
-        Text(stringResource(R.string.nav_profiles), style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-
-        if (homeState.profiles.isEmpty()) {
-            OutlinedButton(onClick = onManageProfiles, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.profiles_add))
-            }
-        } else {
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(homeState.profiles, key = { it.id }) { profile ->
-                    ProfileRow(
-                        profile = profile,
-                        active = profile.id == homeState.activeProfileId,
-                        onSelect = { viewModel.setActive(profile.id) },
-                        onEdit = { onEditProfile(profile.id) },
-                    )
+            profiles.forEach { profile ->
+                val active = profile.id == activeProfileId
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(profile.id) }
+                        .padding(horizontal = 24.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(profile.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (active) {
+                            Text(
+                                text = stringResource(R.string.profiles_active_badge),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                    if (active) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }
@@ -174,4 +287,39 @@ private fun formatBytes(bytes: Long): String {
         unitIndex++
     }
     return "%.1f %s".format(value, units[unitIndex])
+}
+
+// One quiet status line under the button's "Connected" label - sent and
+// received as a single row (up/down arrows), deliberately not a Card so it
+// reads as part of the status text rather than its own surface.
+@Composable
+private fun TrafficLine(sent: Long, received: Long, modifier: Modifier = Modifier) {
+    val arrowTint = MaterialTheme.colorScheme.onSurfaceVariant
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(R.drawable.ic_arrow_up),
+            contentDescription = "sent",
+            tint = arrowTint,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = formatBytes(sent),
+            style = MaterialTheme.typography.bodyMedium,
+            color = arrowTint,
+        )
+        Spacer(Modifier.width(16.dp))
+        Icon(
+            painter = painterResource(R.drawable.ic_arrow_down),
+            contentDescription = "received",
+            tint = arrowTint,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = formatBytes(received),
+            style = MaterialTheme.typography.bodyMedium,
+            color = arrowTint,
+        )
+    }
 }

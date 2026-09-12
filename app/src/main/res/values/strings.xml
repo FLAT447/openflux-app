@@ -43,6 +43,7 @@
     <string name="profiles_empty">No profiles yet. Tap + to add one.</string>
     <string name="profiles_delete">Delete</string>
     <string name="profiles_active_badge">Active</string>
+    <string name="home_profile_selector_select">Select profile</string>
 
     <string name="profile_edit_new_title">New profile</string>
     <string name="profile_edit_title">Edit profile</string>

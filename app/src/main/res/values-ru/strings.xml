@@ -43,6 +43,7 @@
     <string name="profiles_empty">Пока нет профилей. Нажмите +, чтобы добавить.</string>
     <string name="profiles_delete">Удалить</string>
     <string name="profiles_active_badge">Активен</string>
+    <string name="home_profile_selector_select">Выберите профиль</string>
 
     <string name="profile_edit_new_title">Новый профиль</string>
     <string name="profile_edit_title">Изменить профиль</string>
