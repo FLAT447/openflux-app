@@ -81,13 +81,14 @@ fun HomeScreen(
     val homeState by viewModel.state.collectAsState()
     val activeProfile = homeState.activeProfile
     val status by OpenFluxVpnService.callback.status.collectAsState()
+    val channelReady by OpenFluxVpnService.callback.channelReady.collectAsState()
     val stats by OpenFluxVpnService.callback.stats.collectAsState()
     val connected = status is TunnelStatus.Connected || status is TunnelStatus.Connecting
 
     Column(
         modifier = Modifier.fillMaxSize().padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 8.dp),
     ) {
-        Text(statusLabel(status), style = MaterialTheme.typography.headlineSmall)
+        Text(statusLabel(status, channelReady), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
 
         Text(
@@ -147,12 +148,21 @@ fun HomeScreen(
     }
 }
 
+// TunnelStatus.Connected only means the local VPN interface came up and the
+// transport was told to start - not that the covert channel it depends on
+// has actually finished connecting yet (see MobileCallback.channelReady's
+// doc comment). Without checking channelReady too, this said "Подключено"
+// the instant the VPN interface existed, which read as "done" long before
+// traffic could actually flow - including on every silent background
+// reconnect after a drop, not just the first connect.
 @Composable
-private fun statusLabel(status: TunnelStatus): String = when (status) {
-    is TunnelStatus.Stopped -> stringResource(R.string.home_status_stopped)
-    is TunnelStatus.Connecting -> stringResource(R.string.home_status_connecting)
-    is TunnelStatus.Connected -> stringResource(R.string.home_status_connected)
-    is TunnelStatus.Error -> stringResource(R.string.home_status_error, status.message)
+private fun statusLabel(status: TunnelStatus, channelReady: Boolean): String = when {
+    status is TunnelStatus.Stopped -> stringResource(R.string.home_status_stopped)
+    status is TunnelStatus.Connecting -> stringResource(R.string.home_status_connecting)
+    status is TunnelStatus.Connected && !channelReady -> stringResource(R.string.home_status_connecting_channel)
+    status is TunnelStatus.Connected -> stringResource(R.string.home_status_connected)
+    status is TunnelStatus.Error -> stringResource(R.string.home_status_error, (status as TunnelStatus.Error).message)
+    else -> ""
 }
 
 private fun formatBytes(bytes: Long): String {

@@ -70,6 +70,18 @@ class MobileCallback : Callback {
     private val _status = MutableStateFlow<TunnelStatus>(TunnelStatus.Stopped)
     val status: StateFlow<TunnelStatus> = _status
 
+    // OnStatus("connected") only means the local VPN interface came up and
+    // the transport was told to start - it fires immediately, well before
+    // the covert channel (Yandex Docs, ...) has actually finished its own
+    // handshake. Without this, the UI had no way to tell "connected" (VPN
+    // up) apart from "actually relaying traffic yet" - looking done the
+    // moment the tunnel started, even though it could still be several
+    // retries away from working. True once transport.EventConnected fires
+    // (see onLogEvent's "connected" case) and false again on any new
+    // attempt or retry, so a mid-session drop shows as reconnecting too.
+    private val _channelReady = MutableStateFlow(false)
+    val channelReady: StateFlow<Boolean> = _channelReady
+
     private val _stats = MutableStateFlow(TrafficStats())
     val stats: StateFlow<TrafficStats> = _stats
 
@@ -84,6 +96,9 @@ class MobileCallback : Callback {
             status.startsWith("error:") -> TunnelStatus.Error(status.removePrefix("error:"))
             else -> TunnelStatus.Error(status)
         }
+        if (status == "stopped" || status.startsWith("error:")) {
+            _channelReady.value = false
+        }
         appendLifecycleLog(status)
     }
 
@@ -97,6 +112,10 @@ class MobileCallback : Callback {
      * keep arriving for every silent background reconnect, not just once.
      */
     override fun onLogEvent(code: String, detail: String) {
+        when (code) {
+            "connecting", "retrying" -> _channelReady.value = false
+            "connected" -> _channelReady.value = true
+        }
         val entry = when (code) {
             "connecting" -> TunnelLogEntry(
                 id = nextLogEntryId.getAndIncrement(),
@@ -160,6 +179,7 @@ class MobileCallback : Callback {
     fun reset() {
         _status.value = TunnelStatus.Stopped
         _stats.value = TrafficStats()
+        _channelReady.value = false
         // The log is intentionally not cleared here - right after a failed
         // attempt is exactly when seeing what just happened matters most.
     }
