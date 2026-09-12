@@ -57,6 +57,7 @@
     <string name="profile_edit_key_token">Access key</string>
     <string name="profile_edit_doc_url">Yandex Docs URL</string>
     <string name="profile_edit_doc_url_key_hint">Filled in automatically when you import a link; you can also paste one here directly.</string>
+    <string name="profile_edit_doc_url_yandex_hint">If this fails with a balancer_url/config error, the document may be a newer Yandex Docs type - try the Volga transport instead.</string>
     <string name="profile_edit_transport_yandex">Yandex Docs</string>
     <string name="profile_edit_transport_volga">Volga</string>
     <string name="profile_edit_transport_max">MAX</string>

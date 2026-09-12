@@ -198,6 +198,11 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                                 value = current.docUrl,
                                 onValueChange = { profile = current.copy(docUrl = it) },
                                 label = { Text(stringResource(R.string.profile_edit_doc_url)) },
+                                supportingText = if (current.manualTransport == ManualTransport.YANDEX) {
+                                    { Text(stringResource(R.string.profile_edit_doc_url_yandex_hint)) }
+                                } else {
+                                    null
+                                },
                                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             )
                         }

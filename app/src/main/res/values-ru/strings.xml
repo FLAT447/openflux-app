@@ -57,6 +57,7 @@
     <string name="profile_edit_key_token">Ключ доступа</string>
     <string name="profile_edit_doc_url">Ссылка на Yandex Docs</string>
     <string name="profile_edit_doc_url_key_hint">Заполняется автоматически при импорте ссылки; можно вставить и вручную.</string>
+    <string name="profile_edit_doc_url_yandex_hint">Если не подключается с ошибкой про balancer_url/конфиг — возможно, документ нового типа Yandex Docs, попробуйте транспорт Volga.</string>
     <string name="profile_edit_transport_yandex">Yandex Docs</string>
     <string name="profile_edit_transport_volga">Volga</string>
     <string name="profile_edit_transport_max">MAX</string>
