@@ -1,5 +1,6 @@
 package org.openflux.app.ui.deploy
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -180,6 +181,8 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
     val liveStatus by DeployManager.status.collectAsState()
     val status = liveStatus[serverId] ?: server?.lastDeployStatus ?: DeployStatus.NONE
     val message by viewModel.message.collectAsState()
+    val currentStepMap by DeployManager.currentStep.collectAsState()
+    val currentStep = currentStepMap[serverId]
 
     var tabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(
@@ -204,7 +207,7 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 if (status == DeployStatus.RUNNING) {
                     CircularProgressIndicator(modifier = Modifier.padding(end = 12.dp))
-                    Text(stringResource(R.string.deploy_detail_deploying))
+                    Text(currentStep ?: stringResource(R.string.deploy_detail_deploying))
                 } else {
                     Button(onClick = viewModel::deployNow) {
                         Text(stringResource(R.string.deploy_detail_deploy_now))
@@ -254,10 +257,19 @@ fun DeployServerDetailScreen(serverId: String, onEditServer: (String) -> Unit) {
                 }
             }
 
-            when (tabIndex) {
-                0 -> DeployLogTab(serverId)
-                1 -> DeployKeysTab(viewModel)
-                2 -> DeploySettingsTab(viewModel)
+            // Each tab's own content root is a fillMaxSize() LazyColumn - an
+            // unweighted child here would try to claim this outer Column's
+            // full original height (not what's actually left after the
+            // deploy button/summary/message cards/tab row above), the exact
+            // overflow bug DeployKeysTab/DeploySettingsTab's own content
+            // used to have one level down. weight(1f) gives it only what's
+            // really left.
+            Box(modifier = Modifier.weight(1f)) {
+                when (tabIndex) {
+                    0 -> DeployLogTab(serverId)
+                    1 -> DeployKeysTab(viewModel)
+                    2 -> DeploySettingsTab(viewModel)
+                }
             }
         }
     }

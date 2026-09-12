@@ -38,6 +38,15 @@ object DeployManager {
     private val _logs = MutableStateFlow<Map<String, List<String>>>(emptyMap())
     val logs: StateFlow<Map<String, List<String>>> = _logs
 
+    // install.sh's log() helper prints each step as "==> <message>" (in
+    // cyan) as it starts one - e.g. "Installing packages (git, postgresql,
+    // nginx, snapd)", "Configuring Nginx", "Requesting a TLS certificate".
+    // Surfacing the latest one gives a short, concrete "what's happening
+    // right now" instead of a static "Deploying..." for however many
+    // minutes the whole thing takes.
+    private val _currentStep = MutableStateFlow<Map<String, String>>(emptyMap())
+    val currentStep: StateFlow<Map<String, String>> = _currentStep
+
     private val _batchRunning = MutableStateFlow(false)
     val batchRunning: StateFlow<Boolean> = _batchRunning
 
@@ -69,6 +78,7 @@ object DeployManager {
         val id = server.id
         _logs.update { it + (id to emptyList()) }
         _status.update { it + (id to DeployStatus.RUNNING) }
+        _currentStep.update { it - id }
 
         var fingerprint = server.knownHostKeyFingerprint
         val callback = object : DeployCallback {
@@ -77,6 +87,7 @@ object DeployManager {
                     val updated = (current[id].orEmpty() + line).takeLast(MAX_LOG_LINES_PER_SERVER)
                     current + (id to updated)
                 }
+                parseStep(line)?.let { step -> _currentStep.update { it + (id to step) } }
             }
 
             override fun onHostKeyFingerprint(fp: String) {
@@ -101,5 +112,17 @@ object DeployManager {
         val finalStatus = if (succeeded) DeployStatus.SUCCESS else DeployStatus.FAILED
         _status.update { it + (id to finalStatus) }
         repository.recordDeployResult(id, finalStatus, fingerprint)
+    }
+
+    // Matches install.sh's log() output: `printf '\n\033[1;36m==>\033[0m %s\n'`
+    // - an ANSI cyan-colored "==> <message>" line. ANSI codes survive the
+    // SSH stdout stream verbatim (nothing strips them anywhere upstream),
+    // so they have to be stripped here before matching the arrow.
+    private val ansiEscape = Regex("\\[[0-9;]*m")
+    private val stepPrefix = Regex("^==>\\s*(.+)$")
+
+    private fun parseStep(line: String): String? {
+        val clean = ansiEscape.replace(line, "").trim()
+        return stepPrefix.matchEntire(clean)?.groupValues?.get(1)
     }
 }

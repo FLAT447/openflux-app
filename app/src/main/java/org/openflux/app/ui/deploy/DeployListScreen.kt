@@ -50,6 +50,7 @@ import org.openflux.app.deploy.DeployManager
 internal data class DeployListState(
     val servers: List<DeployServer> = emptyList(),
     val liveStatus: Map<String, DeployStatus> = emptyMap(),
+    val currentStep: Map<String, String> = emptyMap(),
     val selectedIds: Set<String> = emptySet(),
     val batchRunning: Boolean = false,
 ) {
@@ -62,10 +63,11 @@ class DeployListViewModel(private val repository: DeployServerRepository) : View
     internal val state: StateFlow<DeployListState> = combine(
         repository.observeAll(),
         DeployManager.status,
+        DeployManager.currentStep,
         selectedIds,
         DeployManager.batchRunning,
-    ) { servers, liveStatus, selected, batchRunning ->
-        DeployListState(servers, liveStatus, selected, batchRunning)
+    ) { servers, liveStatus, currentStep, selected, batchRunning ->
+        DeployListState(servers, liveStatus, currentStep, selected, batchRunning)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DeployListState())
 
     fun toggleSelected(id: String) {
@@ -133,15 +135,16 @@ fun DeployListScreen(onAddServer: () -> Unit, onOpenServer: (String) -> Unit) {
             }
 
             if (state.servers.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.deploy_empty))
                 }
             } else {
-                LazyColumn(Modifier.fillMaxSize()) {
+                LazyColumn(Modifier.weight(1f)) {
                     items(state.servers, key = { it.id }) { server ->
                         DeployServerRow(
                             server = server,
                             status = state.statusFor(server),
+                            currentStep = state.currentStep[server.id],
                             selected = server.id in state.selectedIds,
                             onClick = { onOpenServer(server.id) },
                             onToggleSelected = { viewModel.toggleSelected(server.id) },
@@ -158,6 +161,7 @@ fun DeployListScreen(onAddServer: () -> Unit, onOpenServer: (String) -> Unit) {
 private fun DeployServerRow(
     server: DeployServer,
     status: DeployStatus,
+    currentStep: String?,
     selected: Boolean,
     onClick: () -> Unit,
     onToggleSelected: () -> Unit,
@@ -175,7 +179,11 @@ private fun DeployServerRow(
             Column(modifier = Modifier.weight(1f).padding(start = 4.dp)) {
                 Text(server.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(server.host, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(statusLabel(status))
+                Text(
+                    if (status == DeployStatus.RUNNING && currentStep != null) currentStep else statusLabel(status),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             if (status == DeployStatus.RUNNING) {
                 CircularProgressIndicator(modifier = Modifier.padding(horizontal = 8.dp))

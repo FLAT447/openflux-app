@@ -1,7 +1,6 @@
 package org.openflux.app.ui.deploy
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +36,11 @@ import org.openflux.app.data.AdminIngestToken
  * panel, which manages an open-ended fleet of nodes, this tab only ever
  * shows that single node plus the less commonly needed integration
  * (ingest-token) settings, instead of a general nodes list.
+ *
+ * One LazyColumn for the whole tab (both cards plus the ingest-token rows
+ * as one scrollable unit) rather than a form Column followed by its own
+ * fillMaxSize() LazyColumn/Box - see DeployKeysTab's comment for why that
+ * combination cut content off with no way to scroll back to it.
  */
 @Composable
 fun DeploySettingsTab(viewModel: DeployServerDetailViewModel) {
@@ -47,86 +51,85 @@ fun DeploySettingsTab(viewModel: DeployServerDetailViewModel) {
 
     val node = server?.let { s -> nodes.firstOrNull { it.name == s.nodeName } }
 
-    Column(Modifier.fillMaxSize()) {
-        Card(Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.deploy_settings_node_section), style = MaterialTheme.typography.titleMedium)
-                if (node != null) {
+    LazyColumn(Modifier.fillMaxSize()) {
+        item {
+            Card(Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.deploy_settings_node_section), style = MaterialTheme.typography.titleMedium)
+                    if (node != null) {
+                        Text(
+                            stringResource(R.string.deploy_settings_node_status, nodeStatusLabel(node.status)),
+                            modifier = Modifier.padding(top = 12.dp),
+                        )
+                        Text(stringResource(R.string.deploy_settings_node_max_keys, node.maxKeys))
+                        Text(
+                            stringResource(
+                                R.string.deploy_settings_node_heartbeat,
+                                formatHeartbeat(node.lastHeartbeatAt)
+                                    ?: stringResource(R.string.deploy_settings_node_never),
+                            ),
+                        )
+                        OutlinedButton(
+                            onClick = { viewModel.rotateNodeToken(node.id) },
+                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        ) { Text(stringResource(R.string.deploy_settings_rotate_token)) }
+                    } else {
+                        Text(
+                            stringResource(R.string.deploy_settings_node_missing),
+                            modifier = Modifier.padding(top = 12.dp),
+                        )
+                        Button(
+                            onClick = { server?.let { viewModel.createNode(it.nodeName, it.nodeMaxKeys) } },
+                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        ) { Text(stringResource(R.string.deploy_settings_register_node)) }
+                    }
+                }
+            }
+
+            Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.deploy_settings_ingest_section), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringResource(R.string.deploy_settings_node_status, nodeStatusLabel(node.status)),
-                        modifier = Modifier.padding(top = 12.dp),
+                        stringResource(R.string.deploy_settings_ingest_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
                     )
-                    Text(stringResource(R.string.deploy_settings_node_max_keys, node.maxKeys))
-                    Text(
-                        stringResource(
-                            R.string.deploy_settings_node_heartbeat,
-                            formatHeartbeat(node.lastHeartbeatAt)
-                                ?: stringResource(R.string.deploy_settings_node_never),
-                        ),
-                    )
-                    OutlinedButton(
-                        onClick = { viewModel.rotateNodeToken(node.id) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    ) { Text(stringResource(R.string.deploy_settings_rotate_token)) }
-                } else {
-                    Text(
-                        stringResource(R.string.deploy_settings_node_missing),
-                        modifier = Modifier.padding(top = 12.dp),
+                    OutlinedTextField(
+                        value = ingestLabel,
+                        onValueChange = { ingestLabel = it },
+                        label = { Text(stringResource(R.string.deploy_settings_ingest_label)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     )
                     Button(
-                        onClick = { server?.let { viewModel.createNode(it.nodeName, it.nodeMaxKeys) } },
+                        onClick = {
+                            viewModel.createIngestToken(ingestLabel)
+                            ingestLabel = ""
+                        },
                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    ) { Text(stringResource(R.string.deploy_settings_register_node)) }
+                    ) { Text(stringResource(R.string.deploy_settings_ingest_create)) }
                 }
             }
-        }
 
-        Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Column(Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.deploy_settings_ingest_section), style = MaterialTheme.typography.titleMedium)
+            if (ingestTokens.isNotEmpty()) {
                 Text(
-                    stringResource(R.string.deploy_settings_ingest_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
+                    stringResource(R.string.deploy_settings_ingest_list_header),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 4.dp),
                 )
-                OutlinedTextField(
-                    value = ingestLabel,
-                    onValueChange = { ingestLabel = it },
-                    label = { Text(stringResource(R.string.deploy_settings_ingest_label)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            } else {
+                Text(
+                    stringResource(R.string.deploy_settings_ingest_empty),
+                    modifier = Modifier.padding(16.dp),
                 )
-                Button(
-                    onClick = {
-                        viewModel.createIngestToken(ingestLabel)
-                        ingestLabel = ""
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                ) { Text(stringResource(R.string.deploy_settings_ingest_create)) }
             }
         }
 
-        if (ingestTokens.isNotEmpty()) {
-            Text(
-                stringResource(R.string.deploy_settings_ingest_list_header),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 4.dp),
+        items(ingestTokens, key = { it.id }) { token ->
+            IngestTokenRow(
+                token = token,
+                onToggleEnabled = { viewModel.setIngestTokenEnabled(token.id, !token.enabled) },
             )
-        }
-
-        if (ingestTokens.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.deploy_settings_ingest_empty))
-            }
-        } else {
-            LazyColumn(Modifier.fillMaxSize().padding(top = 4.dp)) {
-                items(ingestTokens, key = { it.id }) { token ->
-                    IngestTokenRow(
-                        token = token,
-                        onToggleEnabled = { viewModel.setIngestTokenEnabled(token.id, !token.enabled) },
-                    )
-                }
-            }
         }
     }
 }

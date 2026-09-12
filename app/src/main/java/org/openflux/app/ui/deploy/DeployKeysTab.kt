@@ -1,7 +1,6 @@
 package org.openflux.app.ui.deploy
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +33,14 @@ import androidx.compose.ui.unit.dp
 import org.openflux.app.R
 import org.openflux.app.data.AdminKey
 
+// A single LazyColumn for the whole tab (the "new key" form as one item,
+// then the key rows) rather than a form Column followed by its own
+// fillMaxSize() LazyColumn - two fillMaxSize()s stacked in a Column both
+// try to claim the full available height (Column doesn't shrink an
+// unweighted child to "whatever's left"), which pushed real content
+// (including the Create button and the last field) off-screen with no way
+// to scroll back to it. One LazyColumn scrolls everything together, so
+// nothing is ever unreachable regardless of screen size or keyboard state.
 @Composable
 fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
     val keys by viewModel.keys.collectAsState()
@@ -42,68 +49,65 @@ fun DeployKeysTab(viewModel: DeployServerDetailViewModel) {
     var trafficLimitGb by remember { mutableStateOf("") }
     var ownerRef by remember { mutableStateOf("") }
 
-    Column(Modifier.fillMaxSize()) {
-        Card(Modifier.fillMaxWidth().padding(16.dp)) {
-            Column(Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.deploy_keys_new_header), style = MaterialTheme.typography.titleMedium)
-                OutlinedTextField(
-                    value = label,
-                    onValueChange = { label = it },
-                    label = { Text(stringResource(R.string.deploy_keys_label)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                )
-                OutlinedTextField(
-                    value = docUrl,
-                    onValueChange = { docUrl = it },
-                    label = { Text(stringResource(R.string.deploy_keys_doc_url)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-                OutlinedTextField(
-                    value = trafficLimitGb,
-                    onValueChange = { trafficLimitGb = it },
-                    label = { Text(stringResource(R.string.deploy_keys_traffic_limit_gb)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-                OutlinedTextField(
-                    value = ownerRef,
-                    onValueChange = { ownerRef = it },
-                    label = { Text(stringResource(R.string.deploy_keys_owner_ref)) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-                Button(
-                    onClick = {
-                        viewModel.createKey(label, docUrl, trafficLimitGb.toDoubleOrNull(), ownerRef)
-                        label = ""
-                        docUrl = ""
-                        trafficLimitGb = ""
-                        ownerRef = ""
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                ) { Text(stringResource(R.string.deploy_keys_create)) }
+    LazyColumn(Modifier.fillMaxSize()) {
+        item {
+            Card(Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.deploy_keys_new_header), style = MaterialTheme.typography.titleMedium)
+                    OutlinedTextField(
+                        value = label,
+                        onValueChange = { label = it },
+                        label = { Text(stringResource(R.string.deploy_keys_label)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    )
+                    OutlinedTextField(
+                        value = docUrl,
+                        onValueChange = { docUrl = it },
+                        label = { Text(stringResource(R.string.deploy_keys_doc_url)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    OutlinedTextField(
+                        value = trafficLimitGb,
+                        onValueChange = { trafficLimitGb = it },
+                        label = { Text(stringResource(R.string.deploy_keys_traffic_limit_gb)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    OutlinedTextField(
+                        value = ownerRef,
+                        onValueChange = { ownerRef = it },
+                        label = { Text(stringResource(R.string.deploy_keys_owner_ref)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    Button(
+                        onClick = {
+                            viewModel.createKey(label, docUrl, trafficLimitGb.toDoubleOrNull(), ownerRef)
+                            label = ""
+                            docUrl = ""
+                            trafficLimitGb = ""
+                            ownerRef = ""
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    ) { Text(stringResource(R.string.deploy_keys_create)) }
+                }
+            }
+
+            Text(
+                stringResource(R.string.deploy_keys_section),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
+            )
+            if (keys.isEmpty()) {
+                Text(stringResource(R.string.deploy_keys_empty), modifier = Modifier.padding(16.dp))
             }
         }
 
-        Text(
-            stringResource(R.string.deploy_keys_section),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
-        )
-
-        if (keys.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.deploy_keys_empty))
-            }
-        } else {
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(keys, key = { it.id }) { key ->
-                    KeyRow(
-                        key = key,
-                        onToggleEnabled = { viewModel.setKeyEnabled(key.id, !key.enabled) },
-                        onRotateToken = { viewModel.rotateKeyToken(key.id) },
-                        onDelete = { viewModel.deleteKey(key.id) },
-                    )
-                }
-            }
+        items(keys, key = { it.id }) { key ->
+            KeyRow(
+                key = key,
+                onToggleEnabled = { viewModel.setKeyEnabled(key.id, !key.enabled) },
+                onRotateToken = { viewModel.rotateKeyToken(key.id) },
+                onDelete = { viewModel.deleteKey(key.id) },
+            )
         }
     }
 }
