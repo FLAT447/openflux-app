@@ -2,7 +2,9 @@ package org.openflux.app.data
 
 enum class ProfileMode { KEY, MANUAL }
 
-/** Only meaningful when mode == MANUAL - a KEY-mode profile's transport is whatever controlplane hands out. */
+// Despite the name, this is set for both profile modes: a KEY-mode profile
+// gets it from an imported deep link (or typed in by hand, same as
+// docUrl) rather than a live controlplane request - see ProfileEditScreen.
 enum class ManualTransport { YANDEX, VOLGA, MAX }
 
 /** The wire name mobile.Config and deep links use for a transport - see mobile/mobile.go. */

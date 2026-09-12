@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,14 +36,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
-import mobile.Mobile
 import org.openflux.app.LocalOpenFluxApp
 import org.openflux.app.R
 import org.openflux.app.data.ManualTransport
 import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileMode
 import org.openflux.app.data.ProfileRepository
-import org.openflux.app.data.parseTransportName
 import org.openflux.app.ui.IntTextField
 import org.openflux.app.ui.LongTextField
 
@@ -66,42 +63,7 @@ class ProfileEditViewModel(private val repository: ProfileRepository) : ViewMode
             onSaved()
         }
     }
-
-    /**
-     * Calls into the Go `mobile` package's ResolveKey (mobile/resolve.go) -
-     * the one deliberate, user-initiated exception to this app never making
-     * a live request to the controlplane to connect (see
-     * Profile.isReadyToConnect). On an active key, also hands back the
-     * doc_url/transport to cache onto the profile so future connects never
-     * need this again.
-     */
-    fun checkKey(controlUrl: String, keyToken: String, onResult: (text: String, resolved: ResolvedKey?) -> Unit) {
-        viewModelScope.launch {
-            val raw = runCatching {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    Mobile.resolveKey(controlUrl, keyToken)
-                }
-            }.getOrElse {
-                onResult("error: ${it.message}", null)
-                return@launch
-            }
-            val resolved = runCatching {
-                val json = org.json.JSONObject(raw)
-                if (json.optString("status") == "active") {
-                    ResolvedKey(
-                        docUrl = json.getString("doc_url"),
-                        transport = parseTransportName(json.optString("transport")),
-                    )
-                } else {
-                    null
-                }
-            }.getOrNull()
-            onResult(raw, resolved)
-        }
-    }
 }
-
-data class ResolvedKey(val docUrl: String, val transport: ManualTransport)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +76,6 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
     val defaultDns by app.settingsRepository.defaultDns.collectAsState(initial = "77.88.8.8")
 
     var profile by remember { mutableStateOf<Profile?>(null) }
-    var checkResult by remember { mutableStateOf<String?>(null) }
 
     // Keyed on profileId + importedProfile so this only (re)loads when the
     // screen is actually navigated to for a different target, not on every
@@ -126,7 +87,6 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
             profileId != null -> viewModel.loadOrNew(profileId) { profile = it }
             else -> viewModel.loadOrNew(null) { profile = it.copy(mtu = defaultMtu, dnsUpstream = defaultDns) }
         }
-        checkResult = null
     }
 
     val current = profile ?: return
@@ -181,6 +141,14 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
 
             when (current.mode) {
                 ProfileMode.KEY -> {
+                    // No live request to a controlplane belongs anywhere in
+                    // this mode, one-off or otherwise - doc_url/transport
+                    // come entirely from data already embedded in an
+                    // imported deep link (see ProfileDeepLink.kt) or typed
+                    // in by hand here, exactly like Fork mode's own
+                    // covert-channel philosophy: everything needed travels
+                    // through the document, never a separate plaintext-
+                    // detectable API call.
                     OutlinedTextField(
                         value = current.controlUrl,
                         onValueChange = { profile = current.copy(controlUrl = it) },
@@ -195,25 +163,13 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                         label = { Text(stringResource(R.string.profile_edit_key_token)) },
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     )
-                    OutlinedButton(
-                        onClick = {
-                            checkResult = null
-                            viewModel.checkKey(current.controlUrl, current.keyToken) { text, resolved ->
-                                checkResult = text
-                                if (resolved != null) {
-                                    profile = current.copy(docUrl = resolved.docUrl, manualTransport = resolved.transport)
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) { Text(stringResource(R.string.profile_edit_check_key)) }
-                    checkResult?.let {
-                        Text(
-                            it,
-                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    OutlinedTextField(
+                        value = current.docUrl,
+                        onValueChange = { profile = current.copy(docUrl = it) },
+                        label = { Text(stringResource(R.string.profile_edit_doc_url)) },
+                        supportingText = { Text(stringResource(R.string.profile_edit_doc_url_key_hint)) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    )
                 }
 
                 ProfileMode.MANUAL -> {
