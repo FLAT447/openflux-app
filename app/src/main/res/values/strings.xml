@@ -105,6 +105,10 @@
     <string name="deploy_edit_tls_mode">TLS mode</string>
     <string name="deploy_edit_tls_domain">Domain</string>
     <string name="deploy_edit_tls_ip">IP</string>
+    <string name="deploy_edit_tls_http">Plain HTTP (no panel)</string>
+    <string name="deploy_edit_port_hint_tls">Needs inbound TCP 443 open on this server (plus 80, briefly, for the certificate) - check your VPS/cloud firewall.</string>
+    <string name="deploy_edit_port_hint_http">Needs inbound TCP 8080 open on this server - check your VPS/cloud firewall.</string>
+    <string name="deploy_edit_tls_http_warning">No panel, no TLS: the admin token and every request travel in plain text over the network. Only for a server you\'ll manage entirely from this app.</string>
     <string name="deploy_edit_domain">Domain name</string>
     <string name="deploy_edit_email">Email (for Let\'s Encrypt)</string>
     <string name="deploy_edit_register_node">Register a first exit node</string>
@@ -169,6 +173,9 @@
     <string name="settings_default_mtu">Default MTU for new profiles</string>
     <string name="settings_default_dns">Default DNS server for new profiles</string>
     <string name="settings_split_tunnel">Split tunneling</string>
+    <string name="settings_battery_hint">Battery optimization can throttle or kill the VPN\'s background connection (and any in-progress server deploy) once the app isn\'t on screen. Optional - only do this if you\'ve noticed disconnects.</string>
+    <string name="settings_battery_optimization">Ignore battery optimizations</string>
+    <string name="settings_battery_already_unrestricted">Battery optimization is already off for this app.</string>
 
     <string name="split_tunnel_title">Split tunneling</string>
     <string name="split_tunnel_hint">Choose which apps use the tunnel. Applies to every profile.</string>

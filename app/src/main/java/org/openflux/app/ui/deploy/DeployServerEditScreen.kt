@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -180,7 +181,32 @@ fun DeployServerEditScreen(serverId: String?, onDone: () -> Unit) {
                     label = { Text(stringResource(R.string.deploy_edit_tls_ip)) },
                     modifier = Modifier.padding(start = 8.dp),
                 )
+                FilterChip(
+                    selected = current.tlsMode == TlsMode.HTTP,
+                    onClick = { server = current.copy(tlsMode = TlsMode.HTTP) },
+                    label = { Text(stringResource(R.string.deploy_edit_tls_http)) },
+                    modifier = Modifier.padding(start = 8.dp),
+                )
             }
+            // install.sh proxies everything through Nginx on 443 (plus a
+            // brief 80 for the Let's Encrypt challenge) in domain/ip mode,
+            // or - in http mode - has controlplane answer directly on 8080
+            // with no proxy/TLS in front of it at all. Either way, the
+            // matching port has to be open in the VPS's own
+            // firewall/cloud security group or nothing here will be
+            // reachable no matter how the deploy itself goes.
+            Text(
+                stringResource(
+                    if (current.tlsMode == TlsMode.HTTP) {
+                        R.string.deploy_edit_port_hint_http
+                    } else {
+                        R.string.deploy_edit_port_hint_tls
+                    },
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
             if (current.tlsMode == TlsMode.DOMAIN) {
                 OutlinedTextField(
                     value = current.domain,
@@ -193,6 +219,14 @@ fun DeployServerEditScreen(serverId: String?, onDone: () -> Unit) {
                     onValueChange = { server = current.copy(email = it) },
                     label = { Text(stringResource(R.string.deploy_edit_email)) },
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+            }
+            if (current.tlsMode == TlsMode.HTTP) {
+                Text(
+                    stringResource(R.string.deploy_edit_tls_http_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
 

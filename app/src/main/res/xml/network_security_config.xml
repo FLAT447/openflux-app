@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Cleartext HTTP is blocked by default: a controlplane key token is a bearer
-  credential, and both it and the Yandex Docs URL it resolves to should only
-  ever travel over TLS. If you need to point a debug build at a local,
-  HTTP-only controlplane during development, add a <domain-config> here
-  scoping cleartextTrafficPermitted="true" to that specific host - don't
-  flip the base-config, since that would also cover the release build.
+  This base-config only governs Java/Kotlin-level networking (OkHttp,
+  HttpURLConnection). The VPN tunnel itself - the Yandex Docs URL it fetches,
+  the WebSocket it opens, controlplane key resolution (mobile.ResolveKey) -
+  runs entirely inside the Go core (gomobile), which does its own dialing
+  and TLS via Go's net/http, completely bypassing this file either way. The
+  only Kotlin-side HTTP client in this app is ControlPlaneAdminClient (Deploy
+  tab: key/node/ingest-token management), and it only ever gets an http://
+  base URL when a server's own TlsMode is explicitly HTTP (see
+  DeployServer.baseUrl) - a deliberate, informed, per-server opt-in the user
+  makes in DeployServerEditScreen, warned about there and by install.sh, not
+  something that can happen by accident to a domain/ip-mode server (those
+  always resolve to https://). Cleartext is allowed here for exactly that
+  reason: it doesn't weaken the tunnel's own connection security (already
+  independent of this file) and is the only way that opt-in feature can work
+  at all - Android would otherwise silently fail every request to an
+  http-mode controlplane with "CLEARTEXT communication not permitted".
 -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="false" />
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

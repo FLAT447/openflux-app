@@ -105,6 +105,10 @@
     <string name="deploy_edit_tls_mode">Режим TLS</string>
     <string name="deploy_edit_tls_domain">Домен</string>
     <string name="deploy_edit_tls_ip">IP</string>
+    <string name="deploy_edit_tls_http">Без панели (HTTP)</string>
+    <string name="deploy_edit_port_hint_tls">Нужен открытый входящий TCP 443 на сервере (и кратко 80 — для сертификата) — проверьте файрвол/security group VPS.</string>
+    <string name="deploy_edit_port_hint_http">Нужен открытый входящий TCP 8080 на сервере — проверьте файрвол/security group VPS.</string>
+    <string name="deploy_edit_tls_http_warning">Без панели и без TLS: токен администратора и все запросы идут по сети в открытом виде. Только для сервера, которым будете управлять исключительно из этого приложения.</string>
     <string name="deploy_edit_domain">Доменное имя</string>
     <string name="deploy_edit_email">Email (для Let\'s Encrypt)</string>
     <string name="deploy_edit_register_node">Зарегистрировать первую exit-ноду</string>
@@ -169,6 +173,9 @@
     <string name="settings_default_mtu">MTU по умолчанию для новых профилей</string>
     <string name="settings_default_dns">DNS по умолчанию для новых профилей</string>
     <string name="settings_split_tunnel">Раздельное туннелирование</string>
+    <string name="settings_battery_hint">Оптимизация батареи может замедлять или обрывать фоновое соединение VPN (и незавершённый деплой сервера), пока приложение не на экране. Необязательно — включайте, только если замечали обрывы.</string>
+    <string name="settings_battery_optimization">Игнорировать оптимизацию батареи</string>
+    <string name="settings_battery_already_unrestricted">Оптимизация батареи для этого приложения уже отключена.</string>
 
     <string name="split_tunnel_title">Раздельное туннелирование</string>
     <string name="split_tunnel_hint">Выберите, какие приложения используют туннель. Применяется ко всем профилям.</string>

@@ -1,7 +1,12 @@
 package org.openflux.app.data
 
 enum class SshAuthMethod { PASSWORD, KEY }
-enum class TlsMode { DOMAIN, IP }
+// HTTP skips Nginx/TLS/the admin-panel domain entirely: install.sh binds
+// controlplane straight to 0.0.0.0:8080 in plain HTTP, meant for someone
+// who wants to manage everything from this app (ControlPlaneAdminClient)
+// and never touch a browser or a domain/certificate. See install.sh's
+// TLS_MODE and DeployServer.baseUrl below.
+enum class TlsMode { DOMAIN, IP, HTTP }
 enum class DeployStatus { NONE, RUNNING, SUCCESS, FAILED }
 
 /**
@@ -54,5 +59,11 @@ data class DeployServer(
     val lastDeployAt: Long = 0,
 ) {
     /** Where this server's controlplane (once deployed) is reachable. */
-    val baseUrl: String get() = "https://" + if (tlsMode == TlsMode.DOMAIN) domain else host
+    val baseUrl: String get() = when (tlsMode) {
+        TlsMode.DOMAIN -> "https://$domain"
+        TlsMode.IP -> "https://$host"
+        // No Nginx in front of it in this mode - see install.sh's TLS_MODE
+        // handling - so this has to hit controlplane's own port directly.
+        TlsMode.HTTP -> "http://$host:8080"
+    }
 }

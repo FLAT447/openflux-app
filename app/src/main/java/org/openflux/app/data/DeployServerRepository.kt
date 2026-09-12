@@ -139,10 +139,14 @@ fun DeployServer.toDeployOptionsJson(): String = JSONObject().apply {
     put("deploy_script_url", deployScriptUrl)
     put("repo_url", repoUrl)
     put("git_ref", gitRef)
-    put("tls_mode", if (tlsMode == TlsMode.IP) "ip" else "domain")
+    put("tls_mode", when (tlsMode) {
+        TlsMode.IP -> "ip"
+        TlsMode.DOMAIN -> "domain"
+        TlsMode.HTTP -> "http"
+    })
     put("domain", domain)
     put("email", email)
-    put("server_ip", host) // the box we're SSHing into is the same one getting the cert in ip mode
+    put("server_ip", host) // the box we're SSHing into is the same one getting the cert in ip/http mode
     put("admin_token", adminToken)
     put("db_password", dbPassword)
     put("register_node", registerNode)
