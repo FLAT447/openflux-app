@@ -38,6 +38,7 @@ import org.openflux.app.data.DeployServer
 import org.openflux.app.data.DeployServerRepository
 import org.openflux.app.data.SshAuthMethod
 import org.openflux.app.data.TlsMode
+import org.openflux.app.ui.IntTextField
 
 class DeployServerEditViewModel(private val repository: DeployServerRepository) : ViewModel() {
     fun loadOrNew(id: String?, onLoaded: (DeployServer) -> Unit) {
@@ -103,9 +104,9 @@ fun DeployServerEditScreen(serverId: String?, onDone: () -> Unit) {
                 label = { Text(stringResource(R.string.deploy_edit_host)) },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
-            OutlinedTextField(
-                value = current.port.toString(),
-                onValueChange = { server = current.copy(port = it.toIntOrNull() ?: current.port) },
+            IntTextField(
+                value = current.port,
+                onValueChange = { server = current.copy(port = it) },
                 label = { Text(stringResource(R.string.deploy_edit_port)) },
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
@@ -215,9 +216,9 @@ fun DeployServerEditScreen(serverId: String?, onDone: () -> Unit) {
                     label = { Text(stringResource(R.string.deploy_edit_node_name)) },
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )
-                OutlinedTextField(
-                    value = current.nodeMaxKeys.toString(),
-                    onValueChange = { server = current.copy(nodeMaxKeys = it.toIntOrNull() ?: current.nodeMaxKeys) },
+                IntTextField(
+                    value = current.nodeMaxKeys,
+                    onValueChange = { server = current.copy(nodeMaxKeys = it) },
                     label = { Text(stringResource(R.string.deploy_edit_node_max_keys)) },
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )

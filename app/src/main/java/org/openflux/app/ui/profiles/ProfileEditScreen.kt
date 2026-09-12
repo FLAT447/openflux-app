@@ -45,6 +45,8 @@ import org.openflux.app.data.Profile
 import org.openflux.app.data.ProfileMode
 import org.openflux.app.data.ProfileRepository
 import org.openflux.app.data.parseTransportName
+import org.openflux.app.ui.IntTextField
+import org.openflux.app.ui.LongTextField
 
 class ProfileEditViewModel(private val repository: ProfileRepository) : ViewModel() {
     fun loadOrNew(id: String?, onLoaded: (Profile) -> Unit) {
@@ -250,9 +252,9 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
                                 label = { Text(stringResource(R.string.profile_edit_max_token)) },
                                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             )
-                            OutlinedTextField(
-                                value = if (current.maxUid == 0L) "" else current.maxUid.toString(),
-                                onValueChange = { profile = current.copy(maxUid = it.toLongOrNull() ?: 0L) },
+                            LongTextField(
+                                value = current.maxUid,
+                                onValueChange = { profile = current.copy(maxUid = it) },
                                 label = { Text(stringResource(R.string.profile_edit_max_uid)) },
                                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             )
@@ -262,9 +264,9 @@ fun ProfileEditScreen(profileId: String?, importedProfile: Profile? = null, onDo
             }
 
             Text(stringResource(R.string.profile_edit_advanced), modifier = Modifier.padding(top = 24.dp))
-            OutlinedTextField(
-                value = current.mtu.toString(),
-                onValueChange = { profile = current.copy(mtu = it.toIntOrNull() ?: current.mtu) },
+            IntTextField(
+                value = current.mtu,
+                onValueChange = { profile = current.copy(mtu = it) },
                 label = { Text(stringResource(R.string.profile_edit_mtu)) },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )

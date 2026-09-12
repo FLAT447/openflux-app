@@ -14,8 +14,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,6 +29,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.openflux.app.LocalOpenFluxApp
 import org.openflux.app.R
@@ -49,8 +54,23 @@ fun SettingsScreen(onOpenSplitTunnel: () -> Unit) {
     )
 
     val startOnBoot by viewModel.startOnBoot.collectAsState(initial = false)
-    val defaultMtu by viewModel.defaultMtu.collectAsState(initial = 1400)
-    val defaultDns by viewModel.defaultDns.collectAsState(initial = "77.88.8.8")
+
+    // Not collectAsState: binding these fields straight to a DataStore-backed
+    // Flow meant every keystroke wrote to disk and then waited for that same
+    // write to echo back through the Flow before the field showed anything
+    // new - on a slower device (or just typing fast, which a 12-13 character
+    // IP address invites) that round trip lagging behind a keystroke or two
+    // is what made typing here feel like it was eating or reordering
+    // characters. Loaded once instead (nulls until then, so the fields below
+    // don't render with a placeholder default and then jump once the real
+    // value arrives); edits update local state immediately and persist as a
+    // side effect, never waiting on themselves to render.
+    var mtuText by remember { mutableStateOf<String?>(null) }
+    var dnsText by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        mtuText = viewModel.defaultMtu.first().toString()
+        dnsText = viewModel.defaultDns.first()
+    }
 
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
@@ -66,18 +86,26 @@ fun SettingsScreen(onOpenSplitTunnel: () -> Unit) {
                 Switch(checked = startOnBoot, onCheckedChange = viewModel::setStartOnBoot)
             }
 
-            OutlinedTextField(
-                value = defaultMtu.toString(),
-                onValueChange = { it.toIntOrNull()?.let(viewModel::setDefaultMtu) },
-                label = { Text(stringResource(R.string.settings_default_mtu)) },
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            )
-            OutlinedTextField(
-                value = defaultDns,
-                onValueChange = viewModel::setDefaultDns,
-                label = { Text(stringResource(R.string.settings_default_dns)) },
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            )
+            if (mtuText != null && dnsText != null) {
+                OutlinedTextField(
+                    value = mtuText!!,
+                    onValueChange = {
+                        mtuText = it
+                        it.toIntOrNull()?.let(viewModel::setDefaultMtu)
+                    },
+                    label = { Text(stringResource(R.string.settings_default_mtu)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+                OutlinedTextField(
+                    value = dnsText!!,
+                    onValueChange = {
+                        dnsText = it
+                        viewModel.setDefaultDns(it)
+                    },
+                    label = { Text(stringResource(R.string.settings_default_dns)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+            }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp))
 
