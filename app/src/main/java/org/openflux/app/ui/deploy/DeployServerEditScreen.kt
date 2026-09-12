@@ -221,6 +221,19 @@ fun DeployServerEditScreen(serverId: String?, onDone: () -> Unit) {
                     label = { Text(stringResource(R.string.deploy_edit_node_max_keys)) },
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.deploy_edit_run_node_here),
+                        modifier = Modifier.weight(1f).padding(end = 12.dp),
+                    )
+                    Switch(
+                        checked = current.runNodeHere,
+                        onCheckedChange = { server = current.copy(runNodeHere = it) },
+                    )
+                }
             }
 
             Row(modifier = Modifier.padding(top = 24.dp)) {

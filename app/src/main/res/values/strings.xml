@@ -109,6 +109,7 @@
     <string name="deploy_edit_register_node">Register a first exit node</string>
     <string name="deploy_edit_node_name">Node name</string>
     <string name="deploy_edit_node_max_keys">Node max keys</string>
+    <string name="deploy_edit_run_node_here">Also run this exit node on this server</string>
     <string name="deploy_edit_save">Save</string>
     <string name="deploy_edit_cancel">Cancel</string>
     <string name="deploy_edit_delete">Delete server</string>

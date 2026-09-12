@@ -109,6 +109,7 @@
     <string name="deploy_edit_register_node">Зарегистрировать первую exit-ноду</string>
     <string name="deploy_edit_node_name">Название ноды</string>
     <string name="deploy_edit_node_max_keys">Макс. ключей у ноды</string>
+    <string name="deploy_edit_run_node_here">Также запустить эту exit-ноду на этом сервере</string>
     <string name="deploy_edit_save">Сохранить</string>
     <string name="deploy_edit_cancel">Отмена</string>
     <string name="deploy_edit_delete">Удалить сервер</string>

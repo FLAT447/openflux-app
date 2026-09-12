@@ -26,6 +26,7 @@ data class DeployServerEntity(
     val registerNode: Boolean,
     val nodeName: String,
     val nodeMaxKeys: Int,
+    val runNodeHere: Boolean,
     val knownHostKeyFingerprint: String,
     val lastDeployStatus: String, // "" | "running" | "success" | "failed"
     val lastDeployAt: Long, // epoch millis, 0 = never

@@ -46,6 +46,7 @@ class DeployServerRepository(
                 registerNode = server.registerNode,
                 nodeName = server.nodeName,
                 nodeMaxKeys = server.nodeMaxKeys,
+                runNodeHere = server.runNodeHere,
                 knownHostKeyFingerprint = server.knownHostKeyFingerprint,
                 lastDeployStatus = existing?.lastDeployStatus ?: "",
                 lastDeployAt = existing?.lastDeployAt ?: 0,
@@ -99,6 +100,7 @@ class DeployServerRepository(
         registerNode = registerNode,
         nodeName = nodeName,
         nodeMaxKeys = nodeMaxKeys,
+        runNodeHere = runNodeHere,
         adminToken = s.adminToken,
         dbPassword = s.dbPassword,
         nodeToken = s.nodeToken,
@@ -146,4 +148,5 @@ fun DeployServer.toDeployOptionsJson(): String = JSONObject().apply {
     put("register_node", registerNode)
     put("node_name", nodeName)
     put("node_max_keys", nodeMaxKeys)
+    put("run_node_here", runNodeHere)
 }.toString()
