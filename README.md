@@ -93,3 +93,9 @@ itself, not the link.
 
 `ProfileDeepLink.buildUri(profile)` builds the matching URI from a `Profile`, for whatever
 generates these links (e.g. the controlplane admin panel or the ingest API's response).
+
+## Contributors
+
+- [FLAT447](https://github.com/FLAT447) — fixed split tunneling only listing system apps
+  ([#1](https://github.com/wlruscfd/openflux-app/pull/1)); added Material You dynamic color and
+  reworked the home screen UI ([#2](https://github.com/wlruscfd/openflux-app/pull/2)).

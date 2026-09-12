@@ -96,3 +96,10 @@ VPN-соединение). Секреты (токен ключа / ссылка 
 
 `ProfileDeepLink.buildUri(profile)` строит такую же ссылку из `Profile` — для всего, что должно их
 генерировать (например, панель управления controlplane или ответ ingest API).
+
+## Контрибьюторы
+
+- [FLAT447](https://github.com/FLAT447) — починил раздельное туннелирование, которое показывало
+  только системные приложения ([#1](https://github.com/wlruscfd/openflux-app/pull/1)); добавил
+  динамические цвета Material You и переработал UI главного экрана
+  ([#2](https://github.com/wlruscfd/openflux-app/pull/2)).
