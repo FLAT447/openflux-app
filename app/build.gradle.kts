@@ -1,8 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+}
+
+// keystore/keystore.properties is git-ignored (see .gitignore) - it and the
+// .jks it points at hold the release signing identity. Absent for anyone
+// without that file (fine: only assembleRelease needs it, debug builds
+// don't), so this is loaded lazily rather than failing the whole build.
+val keystorePropertiesFile = rootProject.file("keystore/keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -14,12 +27,26 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "0.0.1"
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -34,6 +61,16 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    lint {
+        // lintVitalAnalyzeRelease downloads its own detached copy of the
+        // Kotlin compiler on first use - a large (~47MB) one-off fetch from
+        // dl.google.com that's prone to truncating on a flaky connection,
+        // failing assembleRelease for a reason that has nothing to do with
+        // this app's code. Regular `./gradlew lint` still runs the same
+        // checks on demand.
+        checkReleaseBuilds = false
     }
 
     packaging {
