@@ -38,6 +38,7 @@ import org.openflux.app.ui.logs.TunnelLogsScreen
 import org.openflux.app.ui.profiles.ProfileEditScreen
 import org.openflux.app.ui.profiles.ProfileListScreen
 import org.openflux.app.ui.settings.SettingsScreen
+import org.openflux.app.ui.settings.SiteSplitTunnelScreen
 import org.openflux.app.ui.settings.SplitTunnelScreen
 
 private sealed class Destination(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
@@ -54,6 +55,7 @@ private const val DEPLOY_EDIT_ROUTE = "deploy_edit"
 private const val DEPLOY_DETAIL_ROUTE = "deploy_detail"
 private const val DEPLOY_ID_ARG = "serverId"
 private const val SPLIT_TUNNEL_ROUTE = "split_tunnel"
+private const val SITE_SPLIT_TUNNEL_ROUTE = "site_split_tunnel"
 
 @Composable
 fun OpenFluxNavHost(
@@ -199,10 +201,16 @@ fun OpenFluxNavHost(
                 }
             }
             composable(Destination.Settings.route) {
-                SettingsScreen(onOpenSplitTunnel = { navController.navigate(SPLIT_TUNNEL_ROUTE) })
+                SettingsScreen(
+                    onOpenSplitTunnel = { navController.navigate(SPLIT_TUNNEL_ROUTE) },
+                    onOpenSiteSplitTunnel = { navController.navigate(SITE_SPLIT_TUNNEL_ROUTE) },
+                )
             }
             composable(SPLIT_TUNNEL_ROUTE) {
                 SplitTunnelScreen(onDone = { navController.popBackStack() })
+            }
+            composable(SITE_SPLIT_TUNNEL_ROUTE) {
+                SiteSplitTunnelScreen(onDone = { navController.popBackStack() })
             }
         }
     }
